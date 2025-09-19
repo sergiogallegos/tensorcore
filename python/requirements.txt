@@ -1,0 +1,31 @@
+# Core dependencies
+pybind11>=2.6.0
+numpy>=1.19.0
+scipy>=1.7.0
+
+# Build dependencies
+cmake>=3.15
+setuptools>=50.0
+wheel>=0.36
+
+# Optional dependencies for enhanced functionality
+matplotlib>=3.3.0
+pandas>=1.3.0
+scikit-learn>=1.0.0
+
+# Development dependencies (install with pip install -e .[dev])
+pytest>=6.0
+pytest-cov>=2.0
+black>=21.0
+flake8>=3.8
+mypy>=0.800
+sphinx>=4.0
+sphinx-rtd-theme>=0.5
+
+# Testing dependencies (install with pip install -e .[test])
+pytest-benchmark>=3.4
+pytest-xdist>=2.0
+
+# Documentation dependencies (install with pip install -e .[docs])
+myst-parser>=0.15
+nbsphinx>=0.8.0
