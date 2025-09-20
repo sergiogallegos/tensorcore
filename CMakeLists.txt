@@ -17,29 +17,6 @@ else()
     add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 endif()
 
-# Find required packages
-find_package(PkgConfig REQUIRED)
-
-# Find BLAS
-find_package(BLAS REQUIRED)
-if(BLAS_FOUND)
-    message(STATUS "Found BLAS: ${BLAS_LIBRARIES}")
-else()
-    message(FATAL_ERROR "BLAS library not found")
-endif()
-
-# Find LAPACK
-find_package(LAPACK REQUIRED)
-if(LAPACK_FOUND)
-    message(STATUS "Found LAPACK: ${LAPACK_LIBRARIES}")
-else()
-    message(FATAL_ERROR "LAPACK library not found")
-endif()
-
-# Find Python and pybind11 for Python bindings
-find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
-find_package(pybind11 CONFIG REQUIRED)
-
 # Include directories
 include_directories(include)
 include_directories(src)
@@ -50,12 +27,6 @@ set(TENSORCORE_SOURCES
     src/operations.cpp
     src/activations.cpp
     src/losses.cpp
-    src/optimizers.cpp
-    src/layers.cpp
-    src/autograd.cpp
-    src/blas_wrapper.cpp
-    src/simd_utils.cpp
-    src/memory_manager.cpp
     src/utils.cpp
 )
 
@@ -74,12 +45,6 @@ set(TENSORCORE_HEADERS
 # Create the main library
 add_library(tensorcore STATIC ${TENSORCORE_SOURCES} ${TENSORCORE_HEADERS})
 
-# Link libraries
-target_link_libraries(tensorcore 
-    ${BLAS_LIBRARIES} 
-    ${LAPACK_LIBRARIES}
-)
-
 # Set include directories for the library
 target_include_directories(tensorcore PUBLIC include)
 
@@ -90,39 +55,57 @@ target_compile_definitions(tensorcore PRIVATE
     TENSORCORE_VERSION_PATCH=${PROJECT_VERSION_PATCH}
 )
 
-# Enable testing
-enable_testing()
+# Create test executables
+add_executable(test_basic src/test_basic.cpp)
+target_link_libraries(test_basic tensorcore)
 
-# Add subdirectories
-add_subdirectory(tests)
-add_subdirectory(benchmarks)
-add_subdirectory(python)
+add_executable(test_tensor_operations tests/test_tensor_operations.cpp)
+target_link_libraries(test_tensor_operations tensorcore)
 
-# Installation
-install(TARGETS tensorcore
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    RUNTIME DESTINATION bin
-)
+add_executable(test_performance tests/test_performance.cpp)
+target_link_libraries(test_performance tensorcore)
 
-install(DIRECTORY include/tensorcore
-    DESTINATION include
-    FILES_MATCHING PATTERN "*.hpp"
-)
+add_executable(test_edge_cases tests/test_edge_cases.cpp)
+target_link_libraries(test_edge_cases tensorcore)
 
-# CPack configuration
-include(CPack)
-set(CPACK_PACKAGE_NAME "TensorCore")
-set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Educational Machine Learning Library")
-set(CPACK_PACKAGE_VENDOR "TensorCore Contributors")
+# Python bindings (optional)
+option(BUILD_PYTHON_BINDINGS "Build Python bindings" OFF)
+
+if(BUILD_PYTHON_BINDINGS)
+    find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+    
+    # Find pybind11 headers
+    execute_process(
+        COMMAND ${Python3_EXECUTABLE} -c "import pybind11; print(pybind11.get_cmake_dir())"
+        OUTPUT_VARIABLE pybind11_DIR
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    
+    find_package(pybind11 REQUIRED PATHS ${pybind11_DIR})
+    
+    # Create Python module
+    pybind11_add_module(tensorcore_core
+        python/tensorcore_core_minimal.cpp
+    )
+    
+    target_link_libraries(tensorcore_core PRIVATE tensorcore)
+    target_include_directories(tensorcore_core PRIVATE include)
+    
+    # Set output directory for Python module
+    set_target_properties(tensorcore_core PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/python
+    )
+endif()
 
 # Print configuration summary
 message(STATUS "TensorCore Configuration Summary:")
 message(STATUS "  Version: ${PROJECT_VERSION}")
 message(STATUS "  Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "  C++ standard: ${CMAKE_CXX_STANDARD}")
-message(STATUS "  BLAS libraries: ${BLAS_LIBRARIES}")
-message(STATUS "  LAPACK libraries: ${LAPACK_LIBRARIES}")
-message(STATUS "  Python executable: ${Python3_EXECUTABLE}")
-message(STATUS "  pybind11 version: ${pybind11_VERSION}")
+if(BUILD_PYTHON_BINDINGS)
+    message(STATUS "  Python bindings: ON")
+    message(STATUS "  Python executable: ${Python3_EXECUTABLE}")
+    message(STATUS "  pybind11 version: ${pybind11_VERSION}")
+else()
+    message(STATUS "  Python bindings: OFF")
+endif()

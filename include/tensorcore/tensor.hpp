@@ -162,14 +162,5 @@ Tensor operator-(double scalar, const Tensor& tensor);
 Tensor operator*(double scalar, const Tensor& tensor);
 Tensor operator/(double scalar, const Tensor& tensor);
 
-// Utility functions
-Tensor zeros(const Tensor::shape_type& shape);
-Tensor ones(const Tensor::shape_type& shape);
-Tensor eye(size_type size);
-Tensor eye(size_type rows, size_type cols);
-Tensor arange(double start, double stop, double step = 1.0);
-Tensor linspace(double start, double stop, size_type num);
-Tensor random_normal(const Tensor::shape_type& shape, double mean = 0.0, double std = 1.0);
-Tensor random_uniform(const Tensor::shape_type& shape, double min = 0.0, double max = 1.0);
 
 } // namespace tensorcore

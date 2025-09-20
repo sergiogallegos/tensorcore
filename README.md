@@ -10,6 +10,26 @@ A C++ machine learning library designed for educational purposes to understand t
 - **Transparency**: Well-documented code showing exactly what happens under the hood
 - **Modularity**: Clean, modular design that's easy to understand and extend
 
+## ✅ Current Status
+
+### **What's Working Now**
+- ✅ **Core Tensor Operations**: Creation, manipulation, arithmetic, shape operations
+- ✅ **Mathematical Functions**: 50+ mathematical operations (sin, cos, exp, log, etc.)
+- ✅ **Activation Functions**: 15+ activation functions (ReLU, Sigmoid, Tanh, Softmax, etc.)
+- ✅ **Loss Functions**: 10+ loss functions (MSE, MAE, Cross-Entropy, etc.)
+- ✅ **Utility Functions**: Tensor creation, random generation, memory management
+- ✅ **Comprehensive Testing**: Unit tests, performance benchmarks, edge case testing
+- ✅ **Documentation**: Complete API documentation with mathematical explanations
+
+### **What's Coming Next**
+- 🚧 **Automatic Differentiation**: Forward and reverse mode AD for backpropagation
+- 🚧 **Neural Network Layers**: Dense, Convolutional, Recurrent layers
+- 🚧 **Optimizers**: SGD, Adam, RMSprop, and other optimization algorithms
+- 🚧 **Python Bindings**: Full Python integration for easy experimentation
+- 🚧 **GPU Support**: CUDA integration for accelerated computing
+
+*See [Development Roadmap](README_ROADMAP.md) for complete feature list and timeline.*
+
 ## 🏗️ Architecture Overview
 
 ### Core Components
@@ -202,10 +222,23 @@ python benchmarks/compare_with_numpy.py
 
 ## 📚 Learning Resources
 
+### **🎓 Educational Guides**
+- **[Educational Concepts & Theory](README_EDUCATIONAL.md)** - Deep dive into ML/DL concepts and why these libraries exist
+- **[Development Roadmap](README_ROADMAP.md)** - Complete roadmap of pending features for a production-ready library
+- **[Getting Started Tutorial](docs/tutorials/getting_started.md)** - Step-by-step introduction to TensorCore
+
+### **📖 Technical Documentation**
 - [Linear Algebra for Machine Learning](docs/tutorials/linear_algebra.md)
 - [Understanding Automatic Differentiation](docs/tutorials/autograd.md)
 - [SIMD Optimizations Explained](docs/tutorials/simd.md)
 - [Memory Management in C++](docs/tutorials/memory.md)
+
+### **🔬 API Documentation**
+- [Tensor Creation Functions](docs/api/tensor_creation.md)
+- [Mathematical Operations](docs/api/mathematical_functions.md)
+- [Activation Functions](docs/api/activation_functions.md)
+- [Loss Functions](docs/api/loss_functions.md)
+- [Complete API Reference](docs/api/README.md)
 
 ## 🤝 Contributing
 

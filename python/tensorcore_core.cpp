@@ -83,7 +83,7 @@ PYBIND11_MODULE(tensorcore_core, m) {
         .def_property_readonly("shape", &tensorcore::Tensor::shape)
         .def_property_readonly("ndim", &tensorcore::Tensor::ndim)
         .def_property_readonly("size", &tensorcore::Tensor::size)
-        .def_property("data", &tensorcore::Tensor::data, &tensorcore::Tensor::data)
+        .def_property_readonly("data", [](const tensorcore::Tensor& self) { return self.data(); })
         .def_property("requires_grad", &tensorcore::Tensor::requires_grad, &tensorcore::Tensor::set_requires_grad)
         
         // Shape operations
@@ -315,9 +315,5 @@ PYBIND11_MODULE(tensorcore_core, m) {
     m.def("create_ones", &tensorcore::create_ones);
     m.def("create_range", &tensorcore::create_range);
     
-    // Error classes
-    py::register_exception<tensorcore::TensorCoreError>(m, "TensorCoreError");
-    py::register_exception<tensorcore::ShapeError>(m, "ShapeError");
-    py::register_exception<tensorcore::DimensionError>(m, "DimensionError");
-    py::register_exception<tensorcore::ComputationError>(m, "ComputationError");
+    // Note: Exception classes would be registered here if they were defined
 }
