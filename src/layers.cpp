@@ -5,6 +5,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <iostream>
+#include <limits>
 
 namespace tensorcore {
 
@@ -140,18 +141,21 @@ Conv2D::Conv2D(int input_channels, int output_channels, int kernel_size,
     
     // Initialize weights (output_channels, input_channels, kernel_size, kernel_size)
     double std_dev = std::sqrt(2.0 / (static_cast<double>(input_channels) * static_cast<double>(kernel_size) * static_cast<double>(kernel_size)));
-    weights_ = Tensor({static_cast<size_t>(output_channels), static_cast<size_t>(input_channels), static_cast<size_t>(kernel_size), static_cast<size_t>(kernel_size)});
+    std::vector<size_t> weight_shape = {static_cast<size_t>(output_channels), static_cast<size_t>(input_channels), static_cast<size_t>(kernel_size), static_cast<size_t>(kernel_size)};
+    weights_ = Tensor(weight_shape);
     weights_.random_normal(0.0, std_dev);
     
     // Initialize bias if used
     if (use_bias_) {
-        bias_ = Tensor({static_cast<size_t>(output_channels)}, 0.0);
+        std::vector<size_t> bias_shape = {static_cast<size_t>(output_channels)};
+        bias_ = Tensor(bias_shape, 0.0);
     }
     
     // Initialize gradients
-    weight_grad_ = Tensor({static_cast<size_t>(output_channels), static_cast<size_t>(input_channels), static_cast<size_t>(kernel_size), static_cast<size_t>(kernel_size)}, 0.0);
+    weight_grad_ = Tensor(weight_shape, 0.0);
     if (use_bias_) {
-        bias_grad_ = Tensor({static_cast<size_t>(output_channels)}, 0.0);
+        std::vector<size_t> bias_shape = {static_cast<size_t>(output_channels)};
+        bias_grad_ = Tensor(bias_shape, 0.0);
     }
     
     // Set activation function
@@ -169,14 +173,132 @@ Conv2D::Conv2D(int input_channels, int output_channels, int kernel_size,
 }
 
 Tensor Conv2D::forward(const Tensor& input) {
-    // TODO: Implement 2D convolution
-    // This is a placeholder implementation
-    throw std::runtime_error("Conv2D forward pass not yet implemented");
+    if (input.shape().size() != 4) {
+        throw std::invalid_argument("Conv2D input must be 4D tensor (batch, channels, height, width)");
+    }
+    
+    size_t batch_size = input.shape()[0];
+    size_t input_channels = input.shape()[1];
+    size_t input_height = input.shape()[2];
+    size_t input_width = input.shape()[3];
+    
+    if (input_channels != static_cast<size_t>(input_channels_)) {
+        throw std::invalid_argument("Input channels mismatch for Conv2D layer");
+    }
+    
+    // Calculate output dimensions
+    size_t output_height = (input_height + 2 * padding_ - kernel_size_) / stride_ + 1;
+    size_t output_width = (input_width + 2 * padding_ - kernel_size_) / stride_ + 1;
+    
+    // Store input for backward pass
+    last_input_ = input;
+    
+    // Initialize output tensor
+    std::vector<size_t> output_shape = {batch_size, static_cast<size_t>(output_channels_), output_height, output_width};
+    Tensor output(output_shape);
+    
+    // Perform convolution for each sample in batch
+    for (size_t b = 0; b < batch_size; ++b) {
+        for (size_t oc = 0; oc < static_cast<size_t>(output_channels_); ++oc) {
+            for (size_t oh = 0; oh < output_height; ++oh) {
+                for (size_t ow = 0; ow < output_width; ++ow) {
+                    double sum = 0.0;
+                    
+                    // Convolution operation
+                    for (size_t ic = 0; ic < static_cast<size_t>(input_channels_); ++ic) {
+                        for (size_t kh = 0; kh < static_cast<size_t>(kernel_size_); ++kh) {
+                            for (size_t kw = 0; kw < static_cast<size_t>(kernel_size_); ++kw) {
+                                size_t input_h = oh * stride_ + kh - padding_;
+                                size_t input_w = ow * stride_ + kw - padding_;
+                                
+                                // Check bounds
+                                if (input_h < input_height && input_w < input_width) {
+                                    sum += input({b, ic, input_h, input_w}) * weights_({oc, ic, kh, kw});
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Add bias if used
+                    if (use_bias_) {
+                        sum += bias_[oc];
+                    }
+                    
+                    output({b, oc, oh, ow}) = sum;
+                }
+            }
+        }
+    }
+    
+    // Apply activation function
+    Tensor activated_output = activation_->forward(output);
+    last_output_ = activated_output;
+    
+    return activated_output;
 }
 
 Tensor Conv2D::backward(const Tensor& grad_output) {
-    // TODO: Implement 2D convolution backward pass
-    throw std::runtime_error("Conv2D backward pass not yet implemented");
+    if (grad_output.shape() != last_output_.shape()) {
+        throw std::invalid_argument("Gradient shape mismatch in Conv2D backward");
+    }
+    
+    // Apply activation gradient
+    Tensor activation_grad = activation_->backward(last_output_, grad_output);
+    
+    size_t batch_size = last_input_.shape()[0];
+    size_t input_channels = last_input_.shape()[1];
+    size_t input_height = last_input_.shape()[2];
+    size_t input_width = last_input_.shape()[3];
+    size_t output_height = grad_output.shape()[2];
+    size_t output_width = grad_output.shape()[3];
+    
+    // Initialize gradients
+    weight_grad_.fill(0.0);
+    if (use_bias_) {
+        bias_grad_.fill(0.0);
+    }
+    
+    // Compute input gradients
+    Tensor input_grad({batch_size, input_channels, input_height, input_width}, 0.0);
+    
+    // Backward pass through convolution
+    for (size_t b = 0; b < batch_size; ++b) {
+        for (size_t oc = 0; oc < static_cast<size_t>(output_channels_); ++oc) {
+            for (size_t oh = 0; oh < output_height; ++oh) {
+                for (size_t ow = 0; ow < output_width; ++ow) {
+                    double grad_val = activation_grad({b, oc, oh, ow});
+                    
+                    // Update bias gradient
+                    if (use_bias_) {
+                        bias_grad_[oc] += grad_val;
+                    }
+                    
+                    // Update weight and input gradients
+                    for (size_t ic = 0; ic < static_cast<size_t>(input_channels_); ++ic) {
+                        for (size_t kh = 0; kh < static_cast<size_t>(kernel_size_); ++kh) {
+                            for (size_t kw = 0; kw < static_cast<size_t>(kernel_size_); ++kw) {
+                                size_t input_h = oh * stride_ + kh - padding_;
+                                size_t input_w = ow * stride_ + kw - padding_;
+                                
+                                // Check bounds
+                                if (input_h < input_height && input_w < input_width) {
+                                    double input_val = last_input_({b, ic, input_h, input_w});
+                                    
+                                    // Update weight gradient
+                                    weight_grad_({oc, ic, kh, kw}) += grad_val * input_val;
+                                    
+                                    // Update input gradient
+                                    input_grad({b, ic, input_h, input_w}) += grad_val * weights_({oc, ic, kh, kw});
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    return input_grad;
 }
 
 std::vector<Tensor> Conv2D::get_parameters() const {
@@ -215,8 +337,54 @@ MaxPool2D::MaxPool2D(int kernel_size, int stride, int padding)
     : kernel_size_(kernel_size), stride_(stride), padding_(padding) {}
 
 Tensor MaxPool2D::forward(const Tensor& input) {
-    // TODO: Implement 2D max pooling
-    throw std::runtime_error("MaxPool2D forward pass not yet implemented");
+    if (input.shape().size() != 4) {
+        throw std::invalid_argument("MaxPool2D input must be 4D tensor (batch, channels, height, width)");
+    }
+    
+    size_t batch_size = input.shape()[0];
+    size_t channels = input.shape()[1];
+    size_t input_height = input.shape()[2];
+    size_t input_width = input.shape()[3];
+    
+    // Calculate output dimensions
+    size_t output_height = (input_height + 2 * padding_ - kernel_size_) / stride_ + 1;
+    size_t output_width = (input_width + 2 * padding_ - kernel_size_) / stride_ + 1;
+    
+    // Store input for backward pass
+    last_input_ = input;
+    
+    // Initialize output tensor
+    std::vector<size_t> output_shape = {batch_size, channels, output_height, output_width};
+    Tensor output(output_shape);
+    
+    // Perform max pooling for each sample in batch
+    for (size_t b = 0; b < batch_size; ++b) {
+        for (size_t c = 0; c < channels; ++c) {
+            for (size_t oh = 0; oh < output_height; ++oh) {
+                for (size_t ow = 0; ow < output_width; ++ow) {
+                    double max_val = -std::numeric_limits<double>::infinity();
+                    
+                    // Find maximum value in pooling window
+                    for (size_t kh = 0; kh < static_cast<size_t>(kernel_size_); ++kh) {
+                        for (size_t kw = 0; kw < static_cast<size_t>(kernel_size_); ++kw) {
+                            size_t input_h = oh * stride_ + kh - padding_;
+                            size_t input_w = ow * stride_ + kw - padding_;
+                            
+                            // Check bounds
+                            if (input_h < input_height && input_w < input_width) {
+                                double val = input({b, c, input_h, input_w});
+                                max_val = std::max(max_val, val);
+                            }
+                        }
+                    }
+                    
+                    output({b, c, oh, ow}) = max_val;
+                }
+            }
+        }
+    }
+    
+    return output;
 }
 
 Tensor MaxPool2D::backward(const Tensor& grad_output) {
@@ -249,8 +417,56 @@ AvgPool2D::AvgPool2D(int kernel_size, int stride, int padding)
     : kernel_size_(kernel_size), stride_(stride), padding_(padding) {}
 
 Tensor AvgPool2D::forward(const Tensor& input) {
-    // TODO: Implement 2D average pooling
-    throw std::runtime_error("AvgPool2D forward pass not yet implemented");
+    if (input.shape().size() != 4) {
+        throw std::invalid_argument("AvgPool2D input must be 4D tensor (batch, channels, height, width)");
+    }
+    
+    size_t batch_size = input.shape()[0];
+    size_t channels = input.shape()[1];
+    size_t input_height = input.shape()[2];
+    size_t input_width = input.shape()[3];
+    
+    // Calculate output dimensions
+    size_t output_height = (input_height + 2 * padding_ - kernel_size_) / stride_ + 1;
+    size_t output_width = (input_width + 2 * padding_ - kernel_size_) / stride_ + 1;
+    
+    // Store input for backward pass
+    last_input_ = input;
+    
+    // Initialize output tensor
+    std::vector<size_t> output_shape = {batch_size, channels, output_height, output_width};
+    Tensor output(output_shape);
+    
+    // Perform average pooling for each sample in batch
+    for (size_t b = 0; b < batch_size; ++b) {
+        for (size_t c = 0; c < channels; ++c) {
+            for (size_t oh = 0; oh < output_height; ++oh) {
+                for (size_t ow = 0; ow < output_width; ++ow) {
+                    double sum = 0.0;
+                    int count = 0;
+                    
+                    // Calculate average value in pooling window
+                    for (size_t kh = 0; kh < static_cast<size_t>(kernel_size_); ++kh) {
+                        for (size_t kw = 0; kw < static_cast<size_t>(kernel_size_); ++kw) {
+                            size_t input_h = oh * stride_ + kh - padding_;
+                            size_t input_w = ow * stride_ + kw - padding_;
+                            
+                            // Check bounds
+                            if (input_h < input_height && input_w < input_width) {
+                                double val = input({b, c, input_h, input_w});
+                                sum += val;
+                                count++;
+                            }
+                        }
+                    }
+                    
+                    output({b, c, oh, ow}) = count > 0 ? sum / count : 0.0;
+                }
+            }
+        }
+    }
+    
+    return output;
 }
 
 Tensor AvgPool2D::backward(const Tensor& grad_output) {
