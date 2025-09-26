@@ -1,4 +1,5 @@
 #include "tensorcore/tensor.hpp"
+#include "tensorcore/simd_utils.hpp"
 #include <algorithm>
 #include <numeric>
 #include <stdexcept>
@@ -455,10 +456,8 @@ Tensor Tensor::unsqueeze(int axis) const {
 
 // Mathematical operations
 Tensor Tensor::sum() const {
-    value_type result = 0.0;
-    for (size_type i = 0; i < size_; ++i) {
-        result += data_[i];
-    }
+    // Use SIMD-optimized sum for better performance
+    value_type result = SIMDUtils::vectorized_sum(data_.data(), size_);
     return Tensor({1}, {result});
 }
 

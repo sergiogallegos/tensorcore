@@ -1,4 +1,5 @@
 #include "tensorcore/operations.hpp"
+#include "tensorcore/simd_utils.hpp"
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
@@ -12,10 +13,11 @@ Tensor add(const Tensor& a, const Tensor& b) {
         throw std::invalid_argument("Tensor shapes must match for addition");
     }
     
-    Tensor result = a;
-    for (size_t i = 0; i < a.size(); ++i) {
-        result[i] += b[i];
-    }
+    Tensor result(a.shape());
+    
+    // Use SIMD-optimized addition for better performance
+    SIMDUtils::vectorized_add(a.data().data(), b.data().data(), result.data().data(), a.size());
+    
     return result;
 }
 
@@ -36,10 +38,11 @@ Tensor multiply(const Tensor& a, const Tensor& b) {
         throw std::invalid_argument("Tensor shapes must match for multiplication");
     }
     
-    Tensor result = a;
-    for (size_t i = 0; i < a.size(); ++i) {
-        result[i] *= b[i];
-    }
+    Tensor result(a.shape());
+    
+    // Use SIMD-optimized multiplication for better performance
+    SIMDUtils::vectorized_multiply(a.data().data(), b.data().data(), result.data().data(), a.size());
+    
     return result;
 }
 
@@ -316,13 +319,18 @@ Tensor log1p(const Tensor& tensor) {
 
 // Power and root functions
 Tensor sqrt(const Tensor& tensor) {
-    Tensor result = tensor;
+    // Check for negative values first
     for (size_t i = 0; i < tensor.size(); ++i) {
         if (tensor[i] < 0.0) {
             throw std::domain_error("sqrt: input must be non-negative");
         }
-        result[i] = std::sqrt(tensor[i]);
     }
+    
+    Tensor result(tensor.shape());
+    
+    // Use SIMD-optimized square root for better performance
+    SIMDUtils::vectorized_sqrt(tensor.data().data(), result.data().data(), tensor.size());
+    
     return result;
 }
 
