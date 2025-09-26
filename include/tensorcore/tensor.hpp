@@ -61,6 +61,9 @@ public:
     Tensor operator*(value_type scalar) const;
     Tensor operator/(value_type scalar) const;
     
+    // Friend functions for scalar operations
+    friend Tensor operator*(value_type scalar, const Tensor& tensor);
+    
     // In-place operations
     Tensor& operator+=(const Tensor& other);
     Tensor& operator-=(const Tensor& other);
@@ -114,6 +117,8 @@ public:
     Tensor dot(const Tensor& other) const;
     Tensor norm() const;
     Tensor norm(int axis) const;
+    Tensor var() const;
+    Tensor var(int axis) const;
     
     // Utility functions
     Tensor copy() const;

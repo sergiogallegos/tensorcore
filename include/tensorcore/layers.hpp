@@ -50,7 +50,7 @@ private:
     Tensor bias_;
     Tensor weight_grad_;
     Tensor bias_grad_;
-    ActivationFunction activation_;
+    std::shared_ptr<ActivationFunction> activation_;
     Tensor last_input_;
     Tensor last_output_;
 };
@@ -81,7 +81,7 @@ private:
     Tensor bias_;
     Tensor weight_grad_;
     Tensor bias_grad_;
-    ActivationFunction activation_;
+    std::shared_ptr<ActivationFunction> activation_;
     Tensor last_input_;
     Tensor last_output_;
 };

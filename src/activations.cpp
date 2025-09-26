@@ -11,13 +11,6 @@
 namespace tensorcore {
 
 // Basic activation functions
-Tensor relu(const Tensor& x) {
-    Tensor result = x;
-    for (size_t i = 0; i < x.size(); ++i) {
-        result[i] = std::max(0.0, x[i]);
-    }
-    return result;
-}
 
 Tensor leaky_relu(const Tensor& x, double alpha) {
     Tensor result = x;
@@ -64,21 +57,6 @@ Tensor swish(const Tensor& x, double beta) {
 }
 
 // Advanced activation functions
-Tensor sigmoid(const Tensor& x) {
-    Tensor result = x;
-    for (size_t i = 0; i < x.size(); ++i) {
-        result[i] = 1.0 / (1.0 + std::exp(-x[i]));
-    }
-    return result;
-}
-
-Tensor tanh(const Tensor& x) {
-    Tensor result = x;
-    for (size_t i = 0; i < x.size(); ++i) {
-        result[i] = std::tanh(x[i]);
-    }
-    return result;
-}
 
 Tensor softmax(const Tensor& x) {
     if (x.shape().size() != 1) {
@@ -343,5 +321,26 @@ std::function<Tensor(const Tensor&)> create_activation(const std::string& name) 
         throw std::invalid_argument("Unknown activation function: " + name);
     }
 }
+
+// Predefined activation functions
+const ActivationFunction ReLU(
+    [](const Tensor& x) { return relu(x); },
+    [](const Tensor& x, const Tensor& grad_output) { return grad_output * relu_grad(x); }
+);
+
+const ActivationFunction Sigmoid(
+    [](const Tensor& x) { return sigmoid(x); },
+    [](const Tensor& x, const Tensor& grad_output) { return grad_output * sigmoid_grad(x); }
+);
+
+const ActivationFunction Tanh(
+    [](const Tensor& x) { return tanh(x); },
+    [](const Tensor& x, const Tensor& grad_output) { return grad_output * tanh_grad(x); }
+);
+
+const ActivationFunction Identity(
+    [](const Tensor& x) { return x; },
+    [](const Tensor& x, const Tensor& grad_output) { return grad_output; }
+);
 
 } // namespace tensorcore

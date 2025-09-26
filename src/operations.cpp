@@ -591,4 +591,29 @@ Tensor clip_max(const Tensor& tensor, double max_val) {
     return result;
 }
 
+// Missing functions needed for autograd
+Tensor tanh(const Tensor& tensor) {
+    Tensor result = tensor;
+    for (size_t i = 0; i < tensor.size(); ++i) {
+        result[i] = std::tanh(tensor[i]);
+    }
+    return result;
+}
+
+Tensor sigmoid(const Tensor& tensor) {
+    Tensor result = tensor;
+    for (size_t i = 0; i < tensor.size(); ++i) {
+        result[i] = 1.0 / (1.0 + std::exp(-tensor[i]));
+    }
+    return result;
+}
+
+Tensor relu(const Tensor& tensor) {
+    Tensor result = tensor;
+    for (size_t i = 0; i < tensor.size(); ++i) {
+        result[i] = std::max(0.0, tensor[i]);
+    }
+    return result;
+}
+
 } // namespace tensorcore

@@ -238,6 +238,10 @@ Tensor Tensor::operator*(value_type scalar) const {
     return result;
 }
 
+Tensor operator*(Tensor::value_type scalar, const Tensor& tensor) {
+    return tensor * scalar;
+}
+
 Tensor Tensor::operator/(value_type scalar) const {
     if (scalar == 0.0) {
         throw std::runtime_error("Division by zero");
@@ -658,6 +662,27 @@ Tensor Tensor::norm(int axis) const {
     Tensor result(new_shape);
     
     // TODO: Implement axis-wise norm
+    return result;
+}
+
+Tensor Tensor::var() const {
+    Tensor mean_val = mean();
+    Tensor diff = *this - mean_val;
+    Tensor squared_diff = diff * diff;
+    return squared_diff.mean();
+}
+
+Tensor Tensor::var(int axis) const {
+    if (axis < 0 || axis >= static_cast<int>(shape_.size())) {
+        throw std::invalid_argument("Invalid axis");
+    }
+    
+    shape_type new_shape = shape_;
+    new_shape.erase(new_shape.begin() + axis);
+    
+    Tensor result(new_shape);
+    
+    // TODO: Implement axis-wise variance
     return result;
 }
 

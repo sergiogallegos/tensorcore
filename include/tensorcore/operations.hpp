@@ -177,4 +177,9 @@ Tensor max_pool2d(const Tensor& input, const std::vector<int>& kernel_size,
 Tensor gradient(const Tensor& tensor, const Tensor& x);
 Tensor hessian(const Tensor& tensor, const Tensor& x);
 
+// Missing functions needed for autograd
+Tensor sigmoid(const Tensor& tensor);
+Tensor relu(const Tensor& tensor);
+Tensor maximum(const Tensor& a, const Tensor& b);
+
 } // namespace tensorcore
