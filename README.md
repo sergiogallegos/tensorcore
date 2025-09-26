@@ -18,17 +18,19 @@ A C++ machine learning library designed for educational purposes to understand t
 - ✅ **Activation Functions**: 15+ activation functions (ReLU, Sigmoid, Tanh, Softmax, etc.)
 - ✅ **Loss Functions**: 10+ loss functions (MSE, MAE, Cross-Entropy, etc.)
 - ✅ **Automatic Differentiation**: Complete computational graph with forward/backward passes
-- ✅ **Neural Network Layers**: Dense layer with proper weight initialization and gradients
+- ✅ **Neural Network Layers**: Dense, Conv2D, MaxPool2D, AvgPool2D with proper gradients
 - ✅ **Optimizers**: SGD, Adam, AdamW, RMSprop, Adagrad, Adadelta, Adamax, Nadam
 - ✅ **Sequential Networks**: Multi-layer neural networks with end-to-end training
+- ✅ **SIMD Optimizations**: AVX2/AVX/SSE vectorized operations for maximum performance
+- ✅ **Memory Pool**: Efficient allocation/deallocation system for large tensors
 - ✅ **Comprehensive Testing**: All core functionality tests passing
 - ✅ **Documentation**: Complete API documentation with mathematical explanations
 
 ### **What's Coming Next**
-- 🚧 **Advanced Layers**: Conv2D, MaxPool2D, LSTM, Transformer layers
-- 🚧 **Performance Optimizations**: SIMD, memory pooling, GPU acceleration
-- 🚧 **Model Serialization**: Save/load trained models
+- 🚧 **Advanced Layers**: LSTM, Transformer, Attention mechanisms
+- 🚧 **Model Serialization**: Save/load trained models (JSON/Protobuf)
 - 🚧 **Python Bindings**: Full Python integration for easy experimentation
+- 🚧 **GPU Acceleration**: CUDA integration for GPU computing
 - 🚧 **Distributed Training**: Multi-GPU and multi-node support
 
 *See [Development Roadmap](README_ROADMAP.md) for complete feature list and timeline.*
@@ -46,10 +48,13 @@ A C++ machine learning library designed for educational purposes to understand t
 
 ### Key Features
 
-- **SIMD Optimizations**: Vectorized operations for maximum performance
-- **BLAS Integration**: Leverage optimized linear algebra libraries
-- **Memory Management**: Efficient memory allocation and deallocation
-- **Gradient Computation**: Automatic differentiation for backpropagation
+- **SIMD Optimizations**: AVX2/AVX/SSE vectorized operations for 4x-8x performance boost
+- **Memory Pool**: Efficient allocation/deallocation system for large tensors
+- **Automatic Differentiation**: Complete computational graph with forward/backward passes
+- **Neural Network Layers**: Dense, Conv2D, MaxPool2D, AvgPool2D with proper gradients
+- **Optimization Algorithms**: 8 different optimizers (SGD, Adam, RMSprop, etc.)
+- **CPU Feature Detection**: Automatic detection of available SIMD instructions
+- **Performance Benchmarking**: Comprehensive testing framework
 - **GPU Support**: CUDA integration for GPU acceleration (future)
 
 ## 📁 Project Structure
@@ -64,6 +69,8 @@ tensorcore/
 │   ├── optimizers.hpp          # Optimization algorithms
 │   ├── layers.hpp              # Neural network layers
 │   ├── autograd.hpp            # Automatic differentiation
+│   ├── simd_utils.hpp          # SIMD optimizations
+│   ├── memory_pool.hpp         # Memory management
 │   └── utils.hpp               # Utility functions
 ├── src/                        # C++ implementation
 │   ├── tensor.cpp
@@ -73,9 +80,8 @@ tensorcore/
 │   ├── optimizers.cpp
 │   ├── layers.cpp
 │   ├── autograd.cpp
-│   ├── blas_wrapper.cpp        # BLAS integration
 │   ├── simd_utils.cpp          # SIMD optimizations
-│   └── memory_manager.cpp      # Memory management
+│   └── memory_pool.cpp         # Memory management
 ├── python/                     # Python bindings
 │   ├── __init__.py
 │   ├── tensorcore_core.cpp     # pybind11 bindings
@@ -148,6 +154,7 @@ pip install -e .
 #include "tensorcore/layers.hpp"
 #include "tensorcore/optimizers.hpp"
 #include "tensorcore/autograd.hpp"
+#include "tensorcore/simd_utils.hpp"
 
 using namespace tensorcore;
 
@@ -156,24 +163,27 @@ int main() {
     auto x = variable(Tensor({1, 2}, {1.0, 2.0}), true);
     auto y = variable(Tensor({1, 2}, {3.0, 4.0}), true);
     
-    // Perform operations with gradient tracking
+    // Perform operations with gradient tracking (SIMD-optimized)
     auto z = global_graph.add(x, y);
     auto result = global_graph.multiply(z, z);
     
     // Compute gradients
     global_graph.backward(result);
     
-    // Create a neural network
-    auto layer1 = std::make_shared<Dense>(2, 3, true, "relu");
-    auto layer2 = std::make_shared<Dense>(3, 1, true, "sigmoid");
-    Sequential network({layer1, layer2});
+    // Create a neural network with Conv2D
+    auto conv1 = std::make_shared<Conv2D>(1, 32, 3, 1, 1, true, "relu");
+    auto pool1 = std::make_shared<MaxPool2D>(2, 2, 0);
+    auto dense1 = std::make_shared<Dense>(32 * 13 * 13, 128, true, "relu");
+    auto dense2 = std::make_shared<Dense>(128, 10, true, "softmax");
     
-    // Forward pass
-    Tensor input({1, 2}, {1.0, 2.0});
+    Sequential network({conv1, pool1, dense1, dense2});
+    
+    // Forward pass with SIMD optimizations
+    Tensor input({1, 1, 28, 28}); // MNIST-like image
     Tensor output = network.forward(input);
     
     // Training with optimizer
-    SGD optimizer(0.01);
+    Adam optimizer(0.001);
     optimizer.add_parameters(network.get_parameters());
     
     // Training loop
@@ -199,9 +209,18 @@ int main() {
 
 ### **Neural Network Components**
 - **Dense Layer**: Fully connected layer with Xavier initialization
+- **Conv2D Layer**: 2D convolution with forward/backward passes
+- **MaxPool2D Layer**: Maximum pooling for downsampling
+- **AvgPool2D Layer**: Average pooling for downsampling
 - **Activation Functions**: ReLU, Sigmoid, Tanh with proper gradients
 - **Sequential Container**: Easy multi-layer network construction
 - **Gradient Flow**: End-to-end gradient computation through layers
+
+### **Performance Optimizations**
+- **SIMD Vectorization**: AVX2/AVX/SSE instructions for 4x-8x speedup
+- **Memory Pool**: Efficient allocation/deallocation for large tensors
+- **CPU Feature Detection**: Automatic detection of available SIMD instructions
+- **Optimized Operations**: All tensor operations use vectorized instructions
 
 ### **Optimization Algorithms**
 - **SGD**: Stochastic Gradient Descent with momentum
@@ -218,6 +237,7 @@ int main() {
 - End-to-end neural network training verification
 - Gradient computation accuracy validation
 - Performance benchmarking framework
+- SIMD optimization testing
 
 ## 🧮 Mathematical Foundations
 
@@ -248,15 +268,27 @@ This library implements the core mathematical concepts behind machine learning:
 ```bash
 # Build and run core functionality tests
 mkdir build && cd build
-g++ -std=c++17 -I ../include -c ../src/tensor.cpp -o tensor.o
-g++ -std=c++17 -I ../include -c ../src/operations.cpp -o operations.o
-g++ -std=c++17 -I ../include -c ../src/autograd.cpp -o autograd.o
-g++ -std=c++17 -I ../include -c ../src/layers.cpp -o layers.o
-g++ -std=c++17 -I ../include -c ../src/optimizers.cpp -o optimizers.o
-g++ -std=c++17 -I ../include -c ../src/activations.cpp -o activations.o
-g++ -std=c++17 -I ../include -c ../test_core_functionality.cpp -o test_core.o
-g++ -std=c++17 -o test_core test_core.o tensor.o operations.o autograd.o layers.o optimizers.o activations.o
+g++ -std=c++17 -mavx2 -mfma -I ../include -c ../src/tensor.cpp -o tensor.o
+g++ -std=c++17 -mavx2 -mfma -I ../include -c ../src/operations.cpp -o operations.o
+g++ -std=c++17 -mavx2 -mfma -I ../include -c ../src/autograd.cpp -o autograd.o
+g++ -std=c++17 -mavx2 -mfma -I ../include -c ../src/layers.cpp -o layers.o
+g++ -std=c++17 -mavx2 -mfma -I ../include -c ../src/optimizers.cpp -o optimizers.o
+g++ -std=c++17 -mavx2 -mfma -I ../include -c ../src/activations.cpp -o activations.o
+g++ -std=c++17 -mavx2 -mfma -I ../include -c ../src/simd_utils.cpp -o simd_utils.o
+g++ -std=c++17 -mavx2 -mfma -I ../include -c ../src/memory_pool.cpp -o memory_pool.o
+g++ -std=c++17 -mavx2 -mfma -I ../include -c ../test_core_functionality.cpp -o test_core.o
+g++ -std=c++17 -mavx2 -mfma -o test_core test_core.o tensor.o operations.o autograd.o layers.o optimizers.o activations.o simd_utils.o memory_pool.o
 ./test_core
+
+# Run SIMD performance tests
+g++ -std=c++17 -mavx2 -mfma -I ../include -c ../test_simd_performance.cpp -o test_simd.o
+g++ -std=c++17 -mavx2 -mfma -o test_simd test_simd.o tensor.o operations.o autograd.o layers.o optimizers.o activations.o simd_utils.o memory_pool.o
+./test_simd
+
+# Run Conv2D tests
+g++ -std=c++17 -mavx2 -mfma -I ../include -c ../test_conv2d.cpp -o test_conv2d.o
+g++ -std=c++17 -mavx2 -mfma -o test_conv2d test_conv2d.o tensor.o operations.o autograd.o layers.o optimizers.o activations.o simd_utils.o memory_pool.o
+./test_conv2d
 
 # Expected output:
 # Testing TensorCore Core Functionality
@@ -275,10 +307,16 @@ g++ -std=c++17 -o test_core test_core.o tensor.o operations.o autograd.o layers.
 ### Benchmarking
 
 ```bash
-# Run performance benchmarks
-./scripts/benchmark.sh
+# Run SIMD performance benchmarks
+./test_simd
 
-# Compare with NumPy
+# Run Conv2D performance tests
+./test_conv2d
+
+# Run core functionality tests
+./test_core
+
+# Compare with NumPy (when Python bindings are ready)
 python benchmarks/compare_with_numpy.py
 ```
 
@@ -299,8 +337,8 @@ python benchmarks/compare_with_numpy.py
 ### **📖 Technical Documentation**
 - [Linear Algebra for Machine Learning](docs/tutorials/linear_algebra.md)
 - [Understanding Automatic Differentiation](docs/tutorials/autograd.md)
-- [SIMD Optimizations Explained](docs/tutorials/simd.md)
-- [Memory Management in C++](docs/tutorials/memory.md)
+- [SIMD Optimizations Explained](docs/internals/simd_optimizations.md)
+- [Memory Management in C++](docs/internals/memory_management.md)
 
 ### **🔬 API Documentation**
 - [Tensor Creation Functions](docs/api/tensor_creation.md)

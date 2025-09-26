@@ -68,12 +68,27 @@ This documentation provides detailed explanations for every function, class, and
    - Adaptive: `RAdam`, `Lion`
 
 10. **[Neural Network Layers](neural_network_layers.md)**
-    - Linear: `Linear`, `Bilinear`
-    - Convolutional: `Conv2d`, `Conv1d`, `ConvTranspose2d`
-    - Pooling: `MaxPool2d`, `AvgPool2d`
+    - Linear: `Dense`, `Linear`
+    - Convolutional: `Conv2D`, `Conv1d`, `ConvTranspose2d`
+    - Pooling: `MaxPool2D`, `AvgPool2D`
     - Recurrent: `LSTM`, `GRU`
-    - Normalization: `BatchNorm2d`, `LayerNorm`
+    - Normalization: `BatchNorm`, `LayerNorm`
     - Regularization: `Dropout`, `Dropout2d`
+    - Sequential: `Sequential` container for multi-layer networks
+
+### Performance and Optimization
+
+11. **[SIMD Optimizations](../internals/simd_optimizations.md)**
+    - AVX2/AVX/SSE vectorized operations
+    - CPU feature detection
+    - Performance benchmarking
+    - Memory alignment
+
+12. **[Memory Management](../internals/memory_management.md)**
+    - Memory pool system
+    - Efficient allocation/deallocation
+    - RAII wrappers
+    - Performance monitoring
 
 ## 🎯 Educational Focus
 
@@ -190,10 +205,12 @@ TensorCore follows NumPy-style broadcasting:
 
 ### Performance Characteristics
 
-- **Vectorization**: Operations are vectorized using SIMD instructions
-- **BLAS Integration**: Linear algebra operations use optimized BLAS routines
+- **SIMD Vectorization**: AVX2/AVX/SSE instructions for 4x-8x performance boost
+- **Memory Pool**: Efficient allocation/deallocation system for large tensors
+- **CPU Feature Detection**: Automatic detection of available SIMD instructions
 - **Memory Efficiency**: In-place operations and lazy evaluation where possible
 - **Numerical Stability**: Careful implementation to prevent overflow/underflow
+- **Performance Benchmarking**: Comprehensive testing framework for optimization
 
 ## 🎓 Learning Resources
 
