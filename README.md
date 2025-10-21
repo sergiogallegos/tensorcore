@@ -23,11 +23,17 @@ A C++ machine learning library designed for educational purposes to understand t
 - ✅ **Sequential Networks**: Multi-layer neural networks with end-to-end training
 - ✅ **SIMD Optimizations**: AVX2/AVX/SSE vectorized operations for maximum performance
 - ✅ **Memory Pool**: Efficient allocation/deallocation system for large tensors
+- ✅ **Scikit-learn Style ML**: Linear models, preprocessing, metrics, model selection
+- ✅ **Tree-based Models**: DecisionTreeClassifier, DecisionTreeRegressor
 - ✅ **Comprehensive Testing**: All core functionality tests passing
 - ✅ **Documentation**: Complete API documentation with mathematical explanations
 
 ### **What's Coming Next**
-- 🚧 **Advanced Layers**: LSTM, Transformer, Attention mechanisms
+- 🚧 **Advanced ML Algorithms**: Random Forest, Gradient Boosting, SVM, Naive Bayes
+- 🚧 **Clustering Methods**: K-Means, DBSCAN, Hierarchical Clustering, Gaussian Mixture
+- 🚧 **Ensemble Methods**: Voting, Bagging, AdaBoost, Stacking
+- 🚧 **Deep Learning**: LSTM, GRU, Transformer, Attention mechanisms
+- 🚧 **Advanced Math**: SVD, PCA, Eigenvalue decomposition, Fourier transforms
 - 🚧 **Model Serialization**: Save/load trained models (JSON/Protobuf)
 - 🚧 **Python Bindings**: Full Python integration for easy experimentation
 - 🚧 **GPU Acceleration**: CUDA integration for GPU computing
@@ -69,6 +75,7 @@ tensorcore/
 │   ├── optimizers.hpp          # Optimization algorithms
 │   ├── layers.hpp              # Neural network layers
 │   ├── autograd.hpp            # Automatic differentiation
+│   ├── sklearn.hpp             # Scikit-learn style ML algorithms
 │   ├── simd_utils.hpp          # SIMD optimizations
 │   ├── memory_pool.hpp         # Memory management
 │   └── utils.hpp               # Utility functions
@@ -80,6 +87,7 @@ tensorcore/
 │   ├── optimizers.cpp
 │   ├── layers.cpp
 │   ├── autograd.cpp
+│   ├── sklearn.cpp             # Scikit-learn style ML algorithms
 │   ├── simd_utils.cpp          # SIMD optimizations
 │   └── memory_pool.cpp         # Memory management
 ├── python/                     # Python bindings
@@ -149,6 +157,7 @@ pip install -e .
 
 ### Quick Start Example
 
+#### Neural Network Example
 ```cpp
 #include "tensorcore/tensor.hpp"
 #include "tensorcore/layers.hpp"
@@ -199,6 +208,49 @@ int main() {
 }
 ```
 
+#### Scikit-learn Style Machine Learning
+```cpp
+#include "tensorcore/sklearn.hpp"
+
+using namespace tensorcore::sklearn;
+
+int main() {
+    // Create sample data
+    Tensor X = random_normal({100, 4}, 0.0, 1.0);
+    Tensor y = random_normal({100}, 0.0, 1.0);
+    
+    // Split data
+    auto [X_train, X_test, y_train, y_test] = train_test_split(X, y, 0.2);
+    
+    // Preprocess data
+    StandardScaler scaler;
+    scaler.fit(X_train);
+    X_train = scaler.transform(X_train);
+    X_test = scaler.transform(X_test);
+    
+    // Train linear regression
+    LinearRegression lr;
+    lr.fit(X_train, y_train);
+    Tensor predictions = lr.predict(X_test);
+    
+    // Evaluate model
+    double mse = mean_squared_error(y_test, predictions);
+    double r2 = r2_score(y_test, predictions);
+    
+    std::cout << "MSE: " << mse << ", R²: " << r2 << std::endl;
+    
+    // Train decision tree
+    DecisionTreeClassifier dt;
+    dt.fit(X_train, y_train);
+    Tensor tree_predictions = dt.predict(X_test);
+    
+    double accuracy = accuracy_score(y_test, tree_predictions);
+    std::cout << "Decision Tree Accuracy: " << accuracy << std::endl;
+    
+    return 0;
+}
+```
+
 ## 🚀 Core Features Implemented
 
 ### **Automatic Differentiation System**
@@ -232,6 +284,14 @@ int main() {
 - **Adamax**: Adam with infinity norm
 - **Nadam**: Nesterov-accelerated Adam
 
+### **Scikit-learn Style Machine Learning**
+- **Linear Models**: LinearRegression, Ridge, Lasso, ElasticNet, LogisticRegression
+- **Tree-based Models**: DecisionTreeClassifier, DecisionTreeRegressor
+- **Preprocessing**: StandardScaler, MinMaxScaler, LabelEncoder, OneHotEncoder
+- **Evaluation Metrics**: Accuracy, Precision, Recall, F1-Score, MSE, MAE, R²
+- **Model Selection**: train_test_split, cross_val_score, GridSearchCV
+- **Unified API**: Consistent fit/predict/transform interface across all models
+
 ### **Testing & Validation**
 - Comprehensive test suite with 100% core functionality coverage
 - End-to-end neural network training verification
@@ -260,6 +320,30 @@ This library implements the core mathematical concepts behind machine learning:
 - Statistical moments
 - Sampling methods
 - Hypothesis testing utilities
+
+## 🎓 Educational Machine Learning Features
+
+### **Traditional Machine Learning**
+- **Linear Models**: Understanding the mathematics behind linear regression, ridge, lasso
+- **Tree-based Learning**: Decision trees, random forests, gradient boosting
+- **Support Vector Machines**: Kernel methods and margin maximization
+- **Naive Bayes**: Probabilistic classification with independence assumptions
+- **Clustering**: K-means, DBSCAN, hierarchical clustering algorithms
+- **Ensemble Methods**: Voting, bagging, boosting, stacking techniques
+
+### **Deep Learning Foundations**
+- **Recurrent Networks**: LSTM, GRU for sequential data processing
+- **Attention Mechanisms**: Self-attention, multi-head attention, transformer architecture
+- **Convolutional Networks**: Advanced CNN architectures, residual connections
+- **Generative Models**: Variational Autoencoders, Generative Adversarial Networks
+- **Reinforcement Learning**: Q-learning, policy gradient methods
+
+### **Advanced Mathematics**
+- **Matrix Decompositions**: SVD, QR, Cholesky, eigenvalue decomposition
+- **Dimensionality Reduction**: PCA, LDA, t-SNE, UMAP
+- **Signal Processing**: Fourier transforms, wavelet analysis, spectral methods
+- **Optimization Theory**: Convex optimization, constrained optimization, duality
+- **Information Theory**: Entropy, mutual information, KL divergence
 
 ## 🔧 Development
 
