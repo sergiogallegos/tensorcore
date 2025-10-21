@@ -68,12 +68,12 @@ Tensor::Tensor(std::initializer_list<std::initializer_list<value_type>> data)
 }
 
 // Copy and move constructors
-Tensor::Tensor(const Tensor& other)
-    : shape_(other.shape_), data_(other.data_), size_(other.size_), requires_grad_(other.requires_grad_) {}
+Tensor::Tensor(const Tensor& other) 
+    : shape_(other.shape_), size_(other.size_), data_(other.data_), requires_grad_(other.requires_grad_) {}
 
 Tensor::Tensor(Tensor&& other) noexcept
-    : shape_(std::move(other.shape_)), data_(std::move(other.data_)), 
-      size_(other.size_), requires_grad_(other.requires_grad_) {
+    : shape_(std::move(other.shape_)), size_(other.size_), data_(std::move(other.data_)), 
+      requires_grad_(other.requires_grad_) {
     other.size_ = 0;
     other.requires_grad_ = false;
 }
@@ -458,7 +458,7 @@ Tensor Tensor::unsqueeze(int axis) const {
 Tensor Tensor::sum() const {
     // Use SIMD-optimized sum for better performance
     value_type result = SIMDUtils::vectorized_sum(data_.data(), size_);
-    return Tensor({1}, {result});
+    return Tensor({1}, result);
 }
 
 Tensor Tensor::sum(int axis) const {
@@ -480,7 +480,7 @@ Tensor Tensor::mean() const {
     for (size_type i = 0; i < size_; ++i) {
         sum_val += data_[i];
     }
-    return Tensor({1}, {sum_val / static_cast<value_type>(size_)});
+    return Tensor({1}, sum_val / static_cast<value_type>(size_));
 }
 
 Tensor Tensor::mean(int axis) const {
@@ -508,7 +508,7 @@ Tensor Tensor::max() const {
             result = data_[i];
         }
     }
-    return Tensor({1}, {result});
+    return Tensor({1}, result);
 }
 
 Tensor Tensor::max(int axis) const {
@@ -536,7 +536,7 @@ Tensor Tensor::min() const {
             result = data_[i];
         }
     }
-    return Tensor({1}, {result});
+    return Tensor({1}, result);
 }
 
 Tensor Tensor::min(int axis) const {
@@ -639,7 +639,7 @@ Tensor Tensor::dot(const Tensor& other) const {
         result += data_[i] * other[i];
     }
     
-    return Tensor({1}, {result});
+    return Tensor({1}, result);
 }
 
 Tensor Tensor::norm() const {
@@ -647,7 +647,7 @@ Tensor Tensor::norm() const {
     for (size_type i = 0; i < size_; ++i) {
         sum_squares += data_[i] * data_[i];
     }
-    return Tensor({1}, {std::sqrt(sum_squares)});
+    return Tensor({1}, std::sqrt(sum_squares));
 }
 
 Tensor Tensor::norm(int axis) const {
@@ -685,6 +685,27 @@ Tensor Tensor::var(int axis) const {
     return result;
 }
 
+Tensor Tensor::std() const {
+    Tensor variance = var();
+    Tensor result({1});
+    result.data_[0] = std::sqrt(variance.data_[0]);
+    return result;
+}
+
+Tensor Tensor::std(int axis) const {
+    if (axis < 0 || axis >= static_cast<int>(shape_.size())) {
+        throw std::invalid_argument("Invalid axis");
+    }
+    
+    shape_type new_shape = shape_;
+    new_shape.erase(new_shape.begin() + axis);
+    
+    Tensor result(new_shape);
+    
+    // TODO: Implement axis-wise standard deviation
+    return result;
+}
+
 // Utility functions
 Tensor Tensor::copy() const {
     return Tensor(*this);
@@ -712,6 +733,84 @@ void Tensor::random_uniform(value_type min, value_type max) {
     for (size_type i = 0; i < size_; ++i) {
         data_[i] = dist(gen);
     }
+}
+
+Tensor Tensor::flatten() const {
+    Tensor result(std::vector<size_t>{static_cast<size_t>(size_)});
+    result.data_ = data_;
+    return result;
+}
+
+Tensor::value_type Tensor::item() const {
+    if (size_ != 1) {
+        throw std::runtime_error("item() can only be called on scalar tensors");
+    }
+    return data_[0];
+}
+
+Tensor Tensor::inv() const {
+    if (shape_.size() != 2 || shape_[0] != shape_[1]) {
+        throw std::runtime_error("inv() can only be called on square matrices");
+    }
+    
+    size_type n = shape_[0];
+    Tensor result(shape_);
+    
+    // Simple matrix inversion using Gaussian elimination
+    // Create augmented matrix [A|I]
+    std::vector<std::vector<value_type>> augmented(n, std::vector<value_type>(2 * n));
+    
+    for (size_type i = 0; i < n; ++i) {
+        for (size_type j = 0; j < n; ++j) {
+            augmented[i][j] = data_[i * n + j];
+        }
+        augmented[i][n + i] = 1.0; // Identity matrix
+    }
+    
+    // Gaussian elimination
+    for (size_type i = 0; i < n; ++i) {
+        // Find pivot
+        size_type pivot = i;
+        for (size_type k = i + 1; k < n; ++k) {
+            if (std::abs(augmented[k][i]) > std::abs(augmented[pivot][i])) {
+                pivot = k;
+            }
+        }
+        
+        if (std::abs(augmented[pivot][i]) < 1e-10) {
+            throw std::runtime_error("Matrix is singular and cannot be inverted");
+        }
+        
+        // Swap rows
+        if (pivot != i) {
+            std::swap(augmented[i], augmented[pivot]);
+        }
+        
+        // Normalize pivot row
+        value_type pivot_val = augmented[i][i];
+        for (size_type j = 0; j < 2 * n; ++j) {
+            augmented[i][j] /= pivot_val;
+        }
+        
+        // Eliminate column
+        for (size_type k = 0; k < n; ++k) {
+            if (k != i) {
+                value_type factor = augmented[k][i];
+                for (size_type j = 0; j < 2 * n; ++j) {
+                    augmented[k][j] -= factor * augmented[i][j];
+                }
+            }
+        }
+    }
+    
+    // Extract inverse matrix
+    for (size_type i = 0; i < n; ++i) {
+        for (size_type j = 0; j < n; ++j) {
+            result.data_[i * n + j] = augmented[i][n + j];
+        }
+    }
+    
+    return result;
 }
 
 std::string Tensor::to_string() const {
@@ -760,13 +859,13 @@ bool Tensor::is_broadcastable(const Tensor& other) const {
     return true;
 }
 
-Tensor Tensor::broadcast_to(const shape_type& target_shape) const {
+Tensor Tensor::broadcast_to([[maybe_unused]] const shape_type& target_shape) const {
     // Simple implementation - just return a copy for now
     // TODO: Implement actual broadcasting
     return *this;
 }
 
-Tensor Tensor::slice(const std::vector<std::pair<size_type, size_type>>& ranges) const {
+Tensor Tensor::slice([[maybe_unused]] const std::vector<std::pair<size_type, size_type>>& ranges) const {
     // Simple implementation - return a copy for now
     // TODO: Implement actual slicing
     return *this;
@@ -788,7 +887,8 @@ Tensor Tensor::index(const std::vector<size_type>& indices) const {
         stride *= shape_[i];
     }
     
-    return Tensor({1}, {data_[index]});
+    return Tensor({1}, data_[index]);
 }
+
 
 } // namespace tensorcore

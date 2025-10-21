@@ -1,27 +1,43 @@
 #include "tensorcore/simd_utils.hpp"
-#include <immintrin.h>
-#include <x86intrin.h>
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+
+#if TENSORCORE_SIMD_AVAILABLE
+#include <immintrin.h>
+#include <x86intrin.h>
+#endif
 
 namespace tensorcore {
 
 // CPU feature detection
 bool SIMDUtils::has_avx2() {
+#if TENSORCORE_SIMD_AVAILABLE
     return __builtin_cpu_supports("avx2");
+#else
+    return false;
+#endif
 }
 
 bool SIMDUtils::has_avx() {
+#if TENSORCORE_SIMD_AVAILABLE
     return __builtin_cpu_supports("avx");
+#else
+    return false;
+#endif
 }
 
 bool SIMDUtils::has_sse4_1() {
+#if TENSORCORE_SIMD_AVAILABLE
     return __builtin_cpu_supports("sse4.1");
+#else
+    return false;
+#endif
 }
 
 // Vectorized addition with automatic SIMD selection
 void SIMDUtils::vectorized_add(const double* a, const double* b, double* result, size_t size) {
+#if TENSORCORE_SIMD_AVAILABLE
     if (has_avx2()) {
         avx2_add(a, b, result, size);
     } else if (has_avx()) {
@@ -32,10 +48,14 @@ void SIMDUtils::vectorized_add(const double* a, const double* b, double* result,
     } else {
         fallback_add(a, b, result, size);
     }
+#else
+    fallback_add(a, b, result, size);
+#endif
 }
 
 // Vectorized multiplication with automatic SIMD selection
 void SIMDUtils::vectorized_multiply(const double* a, const double* b, double* result, size_t size) {
+#if TENSORCORE_SIMD_AVAILABLE
     if (has_avx2()) {
         avx2_multiply(a, b, result, size);
     } else if (has_avx()) {
@@ -46,10 +66,14 @@ void SIMDUtils::vectorized_multiply(const double* a, const double* b, double* re
     } else {
         fallback_multiply(a, b, result, size);
     }
+#else
+    fallback_multiply(a, b, result, size);
+#endif
 }
 
 // Vectorized square root with automatic SIMD selection
 void SIMDUtils::vectorized_sqrt(const double* a, double* result, size_t size) {
+#if TENSORCORE_SIMD_AVAILABLE
     if (has_avx2()) {
         avx2_sqrt(a, result, size);
     } else if (has_avx()) {
@@ -60,9 +84,13 @@ void SIMDUtils::vectorized_sqrt(const double* a, double* result, size_t size) {
     } else {
         fallback_sqrt(a, result, size);
     }
+#else
+    fallback_sqrt(a, result, size);
+#endif
 }
 
 // AVX2 implementations
+#if TENSORCORE_SIMD_AVAILABLE
 void SIMDUtils::avx2_add(const double* a, const double* b, double* result, size_t size) {
     size_t i = 0;
     
@@ -112,8 +140,10 @@ void SIMDUtils::avx2_sqrt(const double* a, double* result, size_t size) {
         result[i] = std::sqrt(a[i]);
     }
 }
+#endif
 
 // SSE implementations
+#if TENSORCORE_SIMD_AVAILABLE
 void SIMDUtils::sse_add(const double* a, const double* b, double* result, size_t size) {
     size_t i = 0;
     
@@ -163,6 +193,7 @@ void SIMDUtils::sse_sqrt(const double* a, double* result, size_t size) {
         result[i] = std::sqrt(a[i]);
     }
 }
+#endif
 
 // Fallback implementations (no SIMD)
 void SIMDUtils::fallback_add(const double* a, const double* b, double* result, size_t size) {
@@ -184,6 +215,7 @@ void SIMDUtils::fallback_sqrt(const double* a, double* result, size_t size) {
 }
 
 // Scalar operations
+#if TENSORCORE_SIMD_AVAILABLE
 void SIMDUtils::vectorized_add_scalar(const double* a, double scalar, double* result, size_t size) {
     size_t i = 0;
     
@@ -233,8 +265,10 @@ void SIMDUtils::vectorized_multiply_scalar(const double* a, double scalar, doubl
         result[i] = a[i] * scalar;
     }
 }
+#endif
 
 // Reduction operations
+#if TENSORCORE_SIMD_AVAILABLE
 double SIMDUtils::vectorized_sum(const double* a, size_t size) {
     double sum = 0.0;
     size_t i = 0;
@@ -270,7 +304,17 @@ double SIMDUtils::vectorized_sum(const double* a, size_t size) {
     
     return sum;
 }
+#else
+double SIMDUtils::vectorized_sum(const double* a, size_t size) {
+    double sum = 0.0;
+    for (size_t i = 0; i < size; ++i) {
+        sum += a[i];
+    }
+    return sum;
+}
+#endif
 
+#if TENSORCORE_SIMD_AVAILABLE
 double SIMDUtils::vectorized_max(const double* a, size_t size) {
     if (size == 0) return 0.0;
     
@@ -308,7 +352,9 @@ double SIMDUtils::vectorized_max(const double* a, size_t size) {
     
     return max_val;
 }
+#endif
 
+#if TENSORCORE_SIMD_AVAILABLE
 double SIMDUtils::vectorized_min(const double* a, size_t size) {
     if (size == 0) return 0.0;
     
@@ -346,13 +392,17 @@ double SIMDUtils::vectorized_min(const double* a, size_t size) {
     
     return min_val;
 }
+#endif
 
+#if TENSORCORE_SIMD_AVAILABLE
 double SIMDUtils::vectorized_mean(const double* a, size_t size) {
     if (size == 0) return 0.0;
     return vectorized_sum(a, size) / static_cast<double>(size);
 }
+#endif
 
 // Activation functions
+#if TENSORCORE_SIMD_AVAILABLE
 void SIMDUtils::vectorized_relu(const double* a, double* result, size_t size) {
     size_t i = 0;
     
@@ -413,5 +463,6 @@ void SIMDUtils::vectorized_softmax(const double* a, double* result, size_t size)
         }
     }
 }
+#endif
 
 } // namespace tensorcore

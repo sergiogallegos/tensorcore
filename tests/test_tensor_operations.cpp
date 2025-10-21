@@ -21,12 +21,12 @@ void test_tensor_creation() {
     // Test shape constructor
     Tensor t2({3, 4});
     assert(t2.size() == 12);
-    assert(t2.shape() == std::vector<size_t>{3, 4});
+    assert((t2.shape() == std::vector<size_t>{3, 4}));
     
     // Test shape and value constructor
     Tensor t3({2, 3}, 5.0);
     assert(t3.size() == 6);
-    assert(t3.shape() == std::vector<size_t>{2, 3});
+    assert((t3.shape() == std::vector<size_t>{2, 3}));
     for (size_t i = 0; i < t3.size(); ++i) {
         assert(t3[i] == 5.0);
     }
@@ -43,7 +43,7 @@ void test_tensor_creation() {
     // Test 2D initializer list constructor
     Tensor t5({{1.0, 2.0}, {3.0, 4.0}});
     assert(t5.size() == 4);
-    assert(t5.shape() == std::vector<size_t>{2, 2});
+    assert((t5.shape() == std::vector<size_t>{2, 2}));
     assert(t5[0] == 1.0);
     assert(t5[1] == 2.0);
     assert(t5[2] == 3.0);
@@ -102,12 +102,12 @@ void test_tensor_shape_operations() {
     // Test reshape
     Tensor a({2, 3}, 1.0);
     Tensor b = a.reshape({3, 2});
-    assert(b.shape() == std::vector<size_t>{3, 2});
+    assert((b.shape() == std::vector<size_t>{3, 2}));
     assert(b.size() == 6);
     
     // Test transpose
     Tensor c = a.transpose();
-    assert(c.shape() == std::vector<size_t>{3, 2});
+    assert((c.shape() == std::vector<size_t>{3, 2}));
     
     // Test squeeze
     Tensor d({1, 3}, 1.0);
@@ -117,7 +117,7 @@ void test_tensor_shape_operations() {
     // Test unsqueeze
     Tensor f({3}, 1.0);
     Tensor g = f.unsqueeze(0);
-    assert(g.shape() == std::vector<size_t>{1, 3});
+    assert((g.shape() == std::vector<size_t>{1, 3}));
     
     std::cout << "  ✓ Tensor shape operations tests passed" << std::endl;
 }
@@ -191,7 +191,7 @@ void test_tensor_linear_algebra() {
     Tensor a({2, 3}, 1.0);
     Tensor b({3, 2}, 2.0);
     Tensor c = a.matmul(b);
-    assert(c.shape() == std::vector<size_t>{2, 2});
+    assert((c.shape() == std::vector<size_t>{2, 2}));
     for (size_t i = 0; i < c.size(); ++i) {
         assert(c[i] == 6.0); // 3 * 1.0 * 2.0
     }
@@ -244,7 +244,7 @@ void test_activation_functions() {
     
     // Test softmax
     Tensor softmax_x = softmax(x);
-    double sum = 0.0;
+    [[maybe_unused]] double sum = 0.0;
     for (size_t i = 0; i < softmax_x.size(); ++i) {
         assert(softmax_x[i] > 0.0);
         sum += softmax_x[i];
@@ -283,21 +283,21 @@ void test_utility_functions() {
     
     // Test zeros
     Tensor zeros_tensor = zeros({2, 3});
-    assert(zeros_tensor.shape() == std::vector<size_t>{2, 3});
+    assert((zeros_tensor.shape() == std::vector<size_t>{2, 3}));
     for (size_t i = 0; i < zeros_tensor.size(); ++i) {
         assert(zeros_tensor[i] == 0.0);
     }
     
     // Test ones
     Tensor ones_tensor = ones({2, 3});
-    assert(ones_tensor.shape() == std::vector<size_t>{2, 3});
+    assert((ones_tensor.shape() == std::vector<size_t>{2, 3}));
     for (size_t i = 0; i < ones_tensor.size(); ++i) {
         assert(ones_tensor[i] == 1.0);
     }
     
     // Test eye
     Tensor eye_tensor = eye(3);
-    assert(eye_tensor.shape() == std::vector<size_t>{3, 3});
+    assert((eye_tensor.shape() == std::vector<size_t>{3, 3}));
     for (size_t i = 0; i < 3; ++i) {
         for (size_t j = 0; j < 3; ++j) {
             if (i == j) {

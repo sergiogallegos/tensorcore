@@ -258,7 +258,7 @@ Tensor glu(const Tensor& x) {
     Tensor result(shape);
     
     for (size_t i = 0; i < half_size; ++i) {
-        Tensor single_val({1}, {x[i]});
+        Tensor single_val({1}, x[i]);
         double gate = sigmoid(single_val)[0];
         result[i] = gate * x[i + half_size];
     }
@@ -276,7 +276,7 @@ Tensor geglu(const Tensor& x) {
     Tensor result(shape);
     
     for (size_t i = 0; i < half_size; ++i) {
-        Tensor single_val({1}, {x[i]});
+        Tensor single_val({1}, x[i]);
         double gate = gelu(single_val)[0];
         result[i] = gate * x[i + half_size];
     }
@@ -285,7 +285,7 @@ Tensor geglu(const Tensor& x) {
 }
 
 // Activation function selection helper
-std::string get_activation_name(const std::function<Tensor(const Tensor&)>& activation) {
+std::string get_activation_name([[maybe_unused]] const std::function<Tensor(const Tensor&)>& activation) {
     // This is a simple approach - in practice, you might want to use function pointers
     // or a more sophisticated method to identify activation functions
     return "unknown";
@@ -340,7 +340,7 @@ const ActivationFunction Tanh(
 
 const ActivationFunction Identity(
     [](const Tensor& x) { return x; },
-    [](const Tensor& x, const Tensor& grad_output) { return grad_output; }
+    []([[maybe_unused]] const Tensor& x, const Tensor& grad_output) { return grad_output; }
 );
 
 } // namespace tensorcore

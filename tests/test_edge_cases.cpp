@@ -78,7 +78,7 @@ void test_shape_mismatch_errors() {
     Tensor b({3, 2}, 2.0);
     
     // Test that operations with incompatible shapes throw errors
-    bool exception_thrown = false;
+    [[maybe_unused]] bool exception_thrown = false;
     try {
         Tensor c = a + b; // This should throw an error
     } catch (const std::exception& e) {
@@ -95,7 +95,7 @@ void test_invalid_indices() {
     Tensor t({3, 4}, 1.0);
     
     // Test that accessing invalid indices throws errors
-    bool exception_thrown = false;
+    [[maybe_unused]] bool exception_thrown = false;
     try {
         double value = t[100]; // This should throw an error
         (void)value; // Suppress unused variable warning
@@ -170,7 +170,7 @@ void test_softmax_edge_cases() {
     // Test softmax with very large values
     Tensor large_values({3}, 1000.0);
     Tensor softmax_large = softmax(large_values);
-    double sum = 0.0;
+    [[maybe_unused]] double sum = 0.0;
     for (size_t i = 0; i < softmax_large.size(); ++i) {
         assert(softmax_large[i] > 0.0);
         sum += softmax_large[i];

@@ -287,12 +287,122 @@ void zero_gradients(std::vector<Tensor>& tensors) {
     }
 }
 
-void clip_gradients(std::vector<Tensor>& tensors, double max_norm) {
+void clip_gradients([[maybe_unused]] std::vector<Tensor>& tensors, double max_norm) {
     if (max_norm <= 0.0) {
         throw std::invalid_argument("max_norm must be positive");
     }
     
     // TODO: Implement gradient clipping when gradients are implemented
 }
+
+// Additional utility functions for sklearn compatibility
+
+Tensor concatenate(const std::vector<Tensor>& tensors, int axis) {
+    if (tensors.empty()) {
+        throw std::invalid_argument("Cannot concatenate empty tensor list");
+    }
+    
+    // For now, implement simple concatenation along axis 0
+    if (axis != 0) {
+        throw std::runtime_error("Concatenation along non-zero axis not yet implemented");
+    }
+    
+    size_t total_size = 0;
+    for (const auto& tensor : tensors) {
+        total_size += tensor.size();
+    }
+    
+    Tensor result(std::vector<size_t>{static_cast<size_t>(total_size)});
+    size_t offset = 0;
+    for (const auto& tensor : tensors) {
+        for (size_t i = 0; i < tensor.size(); ++i) {
+            result[i + offset] = tensor[i];
+        }
+        offset += tensor.size();
+    }
+    
+    return result;
+}
+
+Tensor where(const Tensor& condition, const Tensor& x, const Tensor& y) {
+    if (condition.shape() != x.shape() || condition.shape() != y.shape()) {
+        throw std::invalid_argument("All tensors must have the same shape");
+    }
+    
+    Tensor result(condition.shape());
+    for (size_t i = 0; i < condition.size(); ++i) {
+        result[i] = (condition[i] != 0.0) ? x[i] : y[i];
+    }
+    
+    return result;
+}
+
+Tensor solve(const Tensor& A, const Tensor& b) {
+    if (A.shape().size() != 2 || A.shape()[0] != A.shape()[1]) {
+        throw std::invalid_argument("A must be a square matrix");
+    }
+    
+    if (b.shape().size() != 1) {
+        throw std::invalid_argument("b must be a vector");
+    }
+    
+    if (A.shape()[0] != b.shape()[0]) {
+        throw std::invalid_argument("A and b must have compatible dimensions");
+    }
+    
+    size_t n = A.shape()[0];
+    
+    // Simple Gaussian elimination with partial pivoting
+    std::vector<std::vector<double>> augmented(n, std::vector<double>(n + 1));
+    
+    // Create augmented matrix [A|b]
+    for (size_t i = 0; i < n; ++i) {
+        for (size_t j = 0; j < n; ++j) {
+            augmented[i][j] = A[i * n + j];
+        }
+        augmented[i][n] = b[i];
+    }
+    
+    // Forward elimination
+    for (size_t i = 0; i < n; ++i) {
+        // Find pivot
+        size_t pivot = i;
+        for (size_t k = i + 1; k < n; ++k) {
+            if (std::abs(augmented[k][i]) > std::abs(augmented[pivot][i])) {
+                pivot = k;
+            }
+        }
+        
+        if (std::abs(augmented[pivot][i]) < 1e-10) {
+            throw std::runtime_error("Matrix is singular");
+        }
+        
+        // Swap rows
+        if (pivot != i) {
+            std::swap(augmented[i], augmented[pivot]);
+        }
+        
+        // Eliminate column
+        for (size_t k = i + 1; k < n; ++k) {
+            double factor = augmented[k][i] / augmented[i][i];
+            for (size_t j = i; j <= n; ++j) {
+                augmented[k][j] -= factor * augmented[i][j];
+            }
+        }
+    }
+    
+    // Back substitution
+    Tensor result(std::vector<size_t>{static_cast<size_t>(n)});
+    for (int i = n - 1; i >= 0; --i) {
+        double sum = 0.0;
+        for (size_t j = i + 1; j < n; ++j) {
+            sum += augmented[i][j] * result[j];
+        }
+        result[i] = (augmented[i][n] - sum) / augmented[i][i];
+    }
+    
+    return result;
+}
+
 
 } // namespace tensorcore

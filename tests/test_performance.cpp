@@ -238,12 +238,12 @@ void benchmark_random_operations() {
     
     {
         PerformanceTimer timer("Random normal generation");
-        Tensor random_normal = random_normal({size}, 0.0, 1.0);
+        Tensor random_normal_tensor = random_normal({size}, 0.0, 1.0);
     }
     
     {
         PerformanceTimer timer("Random uniform generation");
-        Tensor random_uniform = random_uniform({size}, 0.0, 1.0);
+        Tensor random_uniform_tensor = random_uniform({size}, 0.0, 1.0);
     }
 }
 

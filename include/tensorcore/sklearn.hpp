@@ -40,14 +40,14 @@ class BaseEstimator {
 public:
     virtual ~BaseEstimator() = default;
     virtual void fit(const Tensor& X, const Tensor& y = Tensor()) = 0;
-    virtual Tensor predict(const Tensor& X) = 0;
+    virtual Tensor predict(const Tensor& X) const = 0;
     virtual Tensor transform(const Tensor& X) { return predict(X); }
     virtual Tensor fit_transform(const Tensor& X, const Tensor& y = Tensor()) {
         fit(X, y);
         return transform(X);
     }
     virtual std::string get_params() const { return ""; }
-    virtual void set_params(const std::string& params) {}
+    virtual void set_params([[maybe_unused]] const std::string& params) {}
 };
 
 /**
@@ -66,7 +66,7 @@ private:
     bool fit_intercept_;
     bool normalize_;
     bool copy_X_;
-    int n_jobs_;
+    [[maybe_unused]] int n_jobs_;
     
     Tensor coef_;
     Tensor intercept_;
@@ -77,7 +77,7 @@ public:
                     bool copy_X = true, int n_jobs = 1);
     
     void fit(const Tensor& X, const Tensor& y) override;
-    Tensor predict(const Tensor& X) override;
+    Tensor predict(const Tensor& X) const override;
     
     Tensor get_coef() const { return coef_; }
     Tensor get_intercept() const { return intercept_; }
@@ -101,8 +101,8 @@ private:
     double alpha_;
     bool fit_intercept_;
     bool normalize_;
-    int max_iter_;
-    double tol_;
+    [[maybe_unused]] int max_iter_;
+    [[maybe_unused]] double tol_;
     
     Tensor coef_;
     Tensor intercept_;
@@ -113,7 +113,7 @@ public:
           int max_iter = 1000, double tol = 1e-4);
     
     void fit(const Tensor& X, const Tensor& y) override;
-    Tensor predict(const Tensor& X) override;
+    Tensor predict(const Tensor& X) const override;
     
     Tensor get_coef() const { return coef_; }
     Tensor get_intercept() const { return intercept_; }
@@ -137,8 +137,8 @@ private:
     double alpha_;
     bool fit_intercept_;
     bool normalize_;
-    int max_iter_;
-    double tol_;
+    [[maybe_unused]] int max_iter_;
+    [[maybe_unused]] double tol_;
     
     Tensor coef_;
     Tensor intercept_;
@@ -149,7 +149,7 @@ public:
           int max_iter = 1000, double tol = 1e-4);
     
     void fit(const Tensor& X, const Tensor& y) override;
-    Tensor predict(const Tensor& X) override;
+    Tensor predict(const Tensor& X) const override;
     
     Tensor get_coef() const { return coef_; }
     Tensor get_intercept() const { return intercept_; }
@@ -175,8 +175,8 @@ private:
     double l1_ratio_;
     bool fit_intercept_;
     bool normalize_;
-    int max_iter_;
-    double tol_;
+    [[maybe_unused]] int max_iter_;
+    [[maybe_unused]] double tol_;
     
     Tensor coef_;
     Tensor intercept_;
@@ -187,7 +187,7 @@ public:
                bool normalize = false, int max_iter = 1000, double tol = 1e-4);
     
     void fit(const Tensor& X, const Tensor& y) override;
-    Tensor predict(const Tensor& X) override;
+    Tensor predict(const Tensor& X) const override;
     
     Tensor get_coef() const { return coef_; }
     Tensor get_intercept() const { return intercept_; }
@@ -212,8 +212,8 @@ private:
     std::string penalty_;
     double C_;
     bool fit_intercept_;
-    int max_iter_;
-    double tol_;
+    [[maybe_unused]] int max_iter_;
+    [[maybe_unused]] double tol_;
     std::string multi_class_;
     
     Tensor coef_;
@@ -227,7 +227,7 @@ public:
                        double tol = 1e-4, const std::string& multi_class = "auto");
     
     void fit(const Tensor& X, const Tensor& y) override;
-    Tensor predict(const Tensor& X) override;
+    Tensor predict(const Tensor& X) const override;
     Tensor predict_proba(const Tensor& X);
     
     Tensor get_coef() const { return coef_; }
@@ -254,7 +254,7 @@ private:
     int max_depth_;
     int min_samples_split_;
     int min_samples_leaf_;
-    int random_state_;
+    [[maybe_unused]] int random_state_;
     
     // Tree structure (simplified for educational purposes)
     struct TreeNode {
@@ -270,13 +270,23 @@ private:
     std::vector<int> classes_;
     bool fitted_;
     
+    // Private methods for tree building
+    int build_tree(const Tensor& X, const Tensor& y, const std::vector<int>& indices, int depth);
+    double find_best_split(const Tensor& X, const Tensor& y, const std::vector<int>& indices, 
+                           int& best_feature, double& best_threshold);
+    double calculate_impurity(const Tensor& y, const std::vector<int>& indices);
+    double calculate_gini(const Tensor& y, const std::vector<int>& indices);
+    double calculate_entropy(const Tensor& y, const std::vector<int>& indices);
+    int predict_sample(const Tensor& sample) const;
+    std::vector<double> predict_proba_sample(const Tensor& sample) const;
+    
 public:
     DecisionTreeClassifier(const std::string& criterion = "gini", int max_depth = -1,
                           int min_samples_split = 2, int min_samples_leaf = 1, 
                           int random_state = 0);
     
     void fit(const Tensor& X, const Tensor& y) override;
-    Tensor predict(const Tensor& X) override;
+    Tensor predict(const Tensor& X) const override;
     Tensor predict_proba(const Tensor& X);
     
     std::vector<int> get_classes() const { return classes_; }
@@ -301,7 +311,7 @@ private:
     int max_depth_;
     int min_samples_split_;
     int min_samples_leaf_;
-    int random_state_;
+    [[maybe_unused]] int random_state_;
     
     // Tree structure (simplified for educational purposes)
     struct TreeNode {
@@ -316,13 +326,21 @@ private:
     std::vector<TreeNode> tree_;
     bool fitted_;
     
+    // Private methods for tree building
+    int build_tree(const Tensor& X, const Tensor& y, const std::vector<int>& indices, int depth);
+    double find_best_split(const Tensor& X, const Tensor& y, const std::vector<int>& indices,
+                           int& best_feature, double& best_threshold);
+    double calculate_mse(const Tensor& y, const std::vector<int>& indices);
+    double calculate_mae(const Tensor& y, const std::vector<int>& indices);
+    double predict_sample(const Tensor& sample) const;
+    
 public:
     DecisionTreeRegressor(const std::string& criterion = "squared_error", int max_depth = -1,
                          int min_samples_split = 2, int min_samples_leaf = 1, 
                          int random_state = 0);
     
     void fit(const Tensor& X, const Tensor& y) override;
-    Tensor predict(const Tensor& X) override;
+    Tensor predict(const Tensor& X) const override;
     
     double score(const Tensor& X, const Tensor& y) const;
 };
@@ -345,9 +363,9 @@ private:
     int n_clusters_;
     std::string init_;
     int n_init_;
-    int max_iter_;
-    double tol_;
-    int random_state_;
+    [[maybe_unused]] int max_iter_;
+    [[maybe_unused]] double tol_;
+    [[maybe_unused]] int random_state_;
     
     Tensor cluster_centers_;
     std::vector<int> labels_;
@@ -359,7 +377,7 @@ public:
            int random_state = 0);
     
     void fit(const Tensor& X, const Tensor& y = Tensor()) override;
-    Tensor predict(const Tensor& X) override;
+    Tensor predict(const Tensor& X) const override;
     
     Tensor get_cluster_centers() const { return cluster_centers_; }
     std::vector<int> get_labels() const { return labels_; }

@@ -29,6 +29,7 @@ set(TENSORCORE_SOURCES
     src/losses.cpp
     src/utils.cpp
     src/sklearn.cpp
+    src/simd_utils.cpp
 )
 
 # Header files

@@ -274,6 +274,18 @@ Tensor create_zeros(const Tensor::shape_type& shape);
 Tensor create_ones(const Tensor::shape_type& shape);
 Tensor create_range(double start, double stop, double step = 1.0);
 
+// Additional utility functions for sklearn compatibility
+Tensor zeros(const Tensor::shape_type& shape);
+Tensor ones(const Tensor::shape_type& shape);
+Tensor eye(size_t n);
+Tensor concatenate(const std::vector<Tensor>& tensors, int axis);
+Tensor where(const Tensor& condition, const Tensor& x, const Tensor& y);
+Tensor solve(const Tensor& A, const Tensor& b);
+Tensor arange(double start, double stop, double step = 1.0);
+Tensor linspace(double start, double stop, size_t num);
+Tensor random_normal(const Tensor::shape_type& shape, double mean = 0.0, double std = 1.0);
+Tensor random_uniform(const Tensor::shape_type& shape, double min = 0.0, double max = 1.0);
+
 // Debugging utilities
 void print_tensor_info(const Tensor& tensor, const std::string& name = "");
 void print_memory_usage();

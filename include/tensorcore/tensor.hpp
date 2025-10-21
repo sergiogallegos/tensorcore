@@ -119,12 +119,17 @@ public:
     Tensor norm(int axis) const;
     Tensor var() const;
     Tensor var(int axis) const;
+    Tensor std() const;
+    Tensor std(int axis) const;
     
     // Utility functions
     Tensor copy() const;
     void fill(value_type value);
     void random_normal(value_type mean = 0.0, value_type std = 1.0);
     void random_uniform(value_type min = 0.0, value_type max = 1.0);
+    Tensor flatten() const;
+    value_type item() const;
+    Tensor inv() const;
     
     // String representation
     std::string to_string() const;

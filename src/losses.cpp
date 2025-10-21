@@ -18,7 +18,7 @@ Tensor mse_loss(const Tensor& predictions, const Tensor& targets) {
         sum_squared_error += error * error;
     }
     
-    return Tensor({1}, {sum_squared_error / static_cast<double>(predictions.size())});
+    return Tensor({1}, sum_squared_error / static_cast<double>(predictions.size()));
 }
 
 Tensor mae_loss(const Tensor& predictions, const Tensor& targets) {
@@ -31,7 +31,7 @@ Tensor mae_loss(const Tensor& predictions, const Tensor& targets) {
         sum_absolute_error += std::abs(predictions[i] - targets[i]);
     }
     
-    return Tensor({1}, {sum_absolute_error / static_cast<double>(predictions.size())});
+    return Tensor({1}, sum_absolute_error / static_cast<double>(predictions.size()));
 }
 
 Tensor huber_loss(const Tensor& predictions, const Tensor& targets, double delta) {
@@ -53,7 +53,7 @@ Tensor huber_loss(const Tensor& predictions, const Tensor& targets, double delta
         }
     }
     
-    return Tensor({1}, {sum_loss / static_cast<double>(predictions.size())});
+    return Tensor({1}, sum_loss / static_cast<double>(predictions.size()));
 }
 
 Tensor smooth_l1_loss(const Tensor& predictions, const Tensor& targets) {
@@ -71,7 +71,7 @@ Tensor smooth_l1_loss(const Tensor& predictions, const Tensor& targets) {
         }
     }
     
-    return Tensor({1}, {sum_loss / static_cast<double>(predictions.size())});
+    return Tensor({1}, sum_loss / static_cast<double>(predictions.size()));
 }
 
 Tensor smooth_l1_loss(const Tensor& predictions, const Tensor& targets, double beta) {
@@ -89,7 +89,7 @@ Tensor smooth_l1_loss(const Tensor& predictions, const Tensor& targets, double b
         }
     }
     
-    return Tensor({1}, {sum_loss / static_cast<double>(predictions.size())});
+    return Tensor({1}, sum_loss / static_cast<double>(predictions.size()));
 }
 
 // Classification loss functions
@@ -117,7 +117,7 @@ Tensor cross_entropy_loss(const Tensor& predictions, const Tensor& targets) {
         sum_loss += targets[i] * std::log(predictions[i]);
     }
     
-    return Tensor({1}, {-sum_loss});
+    return Tensor({1}, -sum_loss);
 }
 
 Tensor binary_cross_entropy_loss(const Tensor& predictions, const Tensor& targets) {
@@ -146,7 +146,7 @@ Tensor binary_cross_entropy_loss(const Tensor& predictions, const Tensor& target
         sum_loss += t * std::log(p) + (1.0 - t) * std::log(1.0 - p);
     }
     
-    return Tensor({1}, {-sum_loss / static_cast<double>(predictions.size())});
+    return Tensor({1}, -sum_loss / static_cast<double>(predictions.size()));
 }
 
 Tensor categorical_cross_entropy_loss(const Tensor& predictions, const Tensor& targets) {
@@ -173,7 +173,7 @@ Tensor categorical_cross_entropy_loss(const Tensor& predictions, const Tensor& t
         sum_loss += targets[i] * std::log(predictions[i]);
     }
     
-    return Tensor({1}, {-sum_loss});
+    return Tensor({1}, -sum_loss);
 }
 
 Tensor sparse_categorical_cross_entropy_loss(const Tensor& predictions, const Tensor& targets) {
@@ -205,7 +205,7 @@ Tensor sparse_categorical_cross_entropy_loss(const Tensor& predictions, const Te
         sum_loss += std::log(predictions({i, target_class}));
     }
     
-    return Tensor({1}, {-sum_loss / static_cast<double>(predictions.shape()[0])});
+    return Tensor({1}, -sum_loss / static_cast<double>(predictions.shape()[0]));
 }
 
 // Specialized loss functions
@@ -227,7 +227,7 @@ Tensor hinge_loss(const Tensor& predictions, const Tensor& targets) {
         sum_loss += std::max(0.0, margin);
     }
     
-    return Tensor({1}, {sum_loss / static_cast<double>(predictions.size())});
+    return Tensor({1}, sum_loss / static_cast<double>(predictions.size()));
 }
 
 Tensor hinge_loss(const Tensor& predictions, const Tensor& targets, double margin) {
@@ -248,7 +248,7 @@ Tensor hinge_loss(const Tensor& predictions, const Tensor& targets, double margi
         sum_loss += std::max(0.0, loss_margin);
     }
     
-    return Tensor({1}, {sum_loss / static_cast<double>(predictions.size())});
+    return Tensor({1}, sum_loss / static_cast<double>(predictions.size()));
 }
 
 Tensor squared_hinge_loss(const Tensor& predictions, const Tensor& targets) {
@@ -270,7 +270,7 @@ Tensor squared_hinge_loss(const Tensor& predictions, const Tensor& targets) {
         sum_loss += loss * loss;
     }
     
-    return Tensor({1}, {sum_loss / static_cast<double>(predictions.size())});
+    return Tensor({1}, sum_loss / static_cast<double>(predictions.size()));
 }
 
 Tensor squared_hinge_loss(const Tensor& predictions, const Tensor& targets, double margin) {
@@ -292,7 +292,7 @@ Tensor squared_hinge_loss(const Tensor& predictions, const Tensor& targets, doub
         sum_loss += loss * loss;
     }
     
-    return Tensor({1}, {sum_loss / static_cast<double>(predictions.size())});
+    return Tensor({1}, sum_loss / static_cast<double>(predictions.size()));
 }
 
 Tensor kl_divergence_loss(const Tensor& p, const Tensor& q) {
@@ -315,7 +315,7 @@ Tensor kl_divergence_loss(const Tensor& p, const Tensor& q) {
         sum_kl += p[i] * std::log(p[i] / q[i]);
     }
     
-    return Tensor({1}, {sum_kl});
+    return Tensor({1}, sum_kl);
 }
 
 Tensor js_divergence_loss(const Tensor& p, const Tensor& q) {
@@ -349,7 +349,7 @@ Tensor js_divergence_loss(const Tensor& p, const Tensor& q) {
     }
     
     double js_div = 0.5 * kl_p_m + 0.5 * kl_q_m;
-    return Tensor({1}, {js_div});
+    return Tensor({1}, js_div);
 }
 
 // Loss function utilities
@@ -383,7 +383,7 @@ Tensor focal_loss(const Tensor& predictions, const Tensor& targets, double alpha
         sum_loss += focal_weight * ce;
     }
     
-    return Tensor({1}, {-sum_loss / static_cast<double>(predictions.size())});
+    return Tensor({1}, -sum_loss / static_cast<double>(predictions.size()));
 }
 
 Tensor dice_loss(const Tensor& predictions, const Tensor& targets, double smooth) {
@@ -416,11 +416,11 @@ Tensor dice_loss(const Tensor& predictions, const Tensor& targets, double smooth
     }
     
     double dice = (2.0 * intersection + smooth) / (sum_p + sum_t + smooth);
-    return Tensor({1}, {1.0 - dice});
+    return Tensor({1}, 1.0 - dice);
 }
 
 // Loss function selection helper
-std::string get_loss_name(const std::function<Tensor(const Tensor&, const Tensor&)>& loss_func) {
+std::string get_loss_name([[maybe_unused]] const std::function<Tensor(const Tensor&, const Tensor&)>& loss_func) {
     // This is a simple approach - in practice, you might want to use function pointers
     // or a more sophisticated method to identify loss functions
     return "unknown";

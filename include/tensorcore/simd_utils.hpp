@@ -2,8 +2,15 @@
 
 #include <vector>
 #include <cstdint>
+
+// Only include x86 intrinsics on x86/x64 platforms
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
 #include <immintrin.h>  // For AVX/SSE intrinsics
 #include <x86intrin.h>  // For CPU feature detection
+#define TENSORCORE_SIMD_AVAILABLE 1
+#else
+#define TENSORCORE_SIMD_AVAILABLE 0
+#endif
 
 namespace tensorcore {
 
