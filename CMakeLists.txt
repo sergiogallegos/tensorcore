@@ -28,6 +28,7 @@ set(TENSORCORE_SOURCES
     src/activations.cpp
     src/losses.cpp
     src/utils.cpp
+    src/sklearn.cpp
 )
 
 # Header files
@@ -40,6 +41,7 @@ set(TENSORCORE_HEADERS
     include/tensorcore/layers.hpp
     include/tensorcore/autograd.hpp
     include/tensorcore/utils.hpp
+    include/tensorcore/sklearn.hpp
 )
 
 # Create the main library
@@ -85,7 +87,7 @@ if(BUILD_PYTHON_BINDINGS)
     
     # Create Python module
     pybind11_add_module(tensorcore_core
-        python/tensorcore_core_minimal.cpp
+        python/tensorcore_core.cpp
     )
     
     target_link_libraries(tensorcore_core PRIVATE tensorcore)

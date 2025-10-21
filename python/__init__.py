@@ -24,6 +24,7 @@ from . import nn
 from . import optim
 from . import utils
 from . import data
+from . import sklearn
 
 # Make commonly used classes available at the top level
 from .tensorcore_core import Tensor, tensor, zeros, ones, eye, arange, linspace
@@ -70,7 +71,7 @@ __all__ = [
     'gradient', 'hessian',
     
     # Submodules
-    'nn', 'optim', 'utils', 'data',
+    'nn', 'optim', 'utils', 'data', 'sklearn',
     
     # Version info
     '__version__', '__version_info__', '__author__', '__email__'
