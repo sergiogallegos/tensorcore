@@ -2,6 +2,13 @@
 
 #include "tensor.hpp"
 
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
+#include <functional>
+#include <string>
+#include <utility>
+#include <vector>
+#endif
+
 namespace tensorcore {
 
 /**
@@ -16,8 +23,10 @@ Tensor mse_loss(const Tensor& predictions, const Tensor& targets);
 Tensor mae_loss(const Tensor& predictions, const Tensor& targets);
 Tensor huber_loss(const Tensor& predictions, const Tensor& targets, double delta = 1.0);
 Tensor smooth_l1_loss(const Tensor& predictions, const Tensor& targets, double beta = 1.0);
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
 Tensor poisson_loss(const Tensor& predictions, const Tensor& targets);
 Tensor cosine_similarity_loss(const Tensor& predictions, const Tensor& targets);
+#endif
 
 // Classification losses
 Tensor cross_entropy_loss(const Tensor& predictions, const Tensor& targets);
@@ -30,12 +39,15 @@ Tensor dice_loss(const Tensor& predictions, const Tensor& targets, double smooth
 // Hinge losses
 Tensor hinge_loss(const Tensor& predictions, const Tensor& targets, double margin = 1.0);
 Tensor squared_hinge_loss(const Tensor& predictions, const Tensor& targets, double margin = 1.0);
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
 Tensor categorical_hinge_loss(const Tensor& predictions, const Tensor& targets);
+#endif
 
 // KL divergence losses
 Tensor kl_divergence_loss(const Tensor& predictions, const Tensor& targets);
 Tensor js_divergence_loss(const Tensor& predictions, const Tensor& targets);
 
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
 // Wasserstein losses
 Tensor wasserstein_loss(const Tensor& predictions, const Tensor& targets);
 Tensor earth_mover_distance_loss(const Tensor& predictions, const Tensor& targets);
@@ -136,5 +148,6 @@ Tensor elastic_net_regularization(const Tensor& weights, double l1_lambda = 0.01
 // Gradient penalties
 Tensor gradient_penalty(const Tensor& predictions, const Tensor& targets, double lambda = 10.0);
 Tensor spectral_norm_penalty(const Tensor& weights, double lambda = 0.01);
+#endif
 
 } // namespace tensorcore

@@ -5,39 +5,40 @@ A C++ machine learning library designed for educational purposes to understand t
 ## 🎯 Project Goals
 
 - **Educational Focus**: Learn the fundamental mathematics and algorithms behind modern ML libraries
-- **Performance**: Implement efficient C++ code with SIMD optimizations and BLAS integration
+- **Performance**: Start with readable reference implementations, then add optional SIMD or BLAS-backed versions once correctness is locked down
 - **Python Integration**: Provide seamless Python bindings for easy experimentation
 - **Transparency**: Well-documented code showing exactly what happens under the hood
 - **Modularity**: Clean, modular design that's easy to understand and extend
 
-## ✅ Current Status
+## Current Status
 
-### **What's Working Now**
-- ✅ **Core Tensor Operations**: Creation, manipulation, arithmetic, shape operations
-- ✅ **Mathematical Functions**: 50+ mathematical operations (sin, cos, exp, log, etc.)
-- ✅ **Activation Functions**: 15+ activation functions (ReLU, Sigmoid, Tanh, Softmax, etc.)
-- ✅ **Loss Functions**: 10+ loss functions (MSE, MAE, Cross-Entropy, etc.)
-- ✅ **Automatic Differentiation**: Complete computational graph with forward/backward passes
-- ✅ **Neural Network Layers**: Dense, Conv2D, MaxPool2D, AvgPool2D with proper gradients
-- ✅ **Optimizers**: SGD, Adam, AdamW, RMSprop, Adagrad, Adadelta, Adamax, Nadam
-- ✅ **Sequential Networks**: Multi-layer neural networks with end-to-end training
-- ✅ **SIMD Optimizations**: AVX2/AVX/SSE vectorized operations for maximum performance
-- ✅ **Memory Pool**: Efficient allocation/deallocation system for large tensors
-- ✅ **Scikit-learn Style ML**: Linear models, preprocessing, metrics, model selection
-- ✅ **Tree-based Models**: DecisionTreeClassifier, DecisionTreeRegressor
-- ✅ **Comprehensive Testing**: All core functionality tests passing
-- ✅ **Documentation**: Complete API documentation with mathematical explanations
+TensorCore is currently an educational prototype. The most useful path forward is
+to keep a small, correct reference core and move broader framework-style features
+behind an experimental boundary until they are implemented and tested.
 
-### **What's Coming Next**
-- 🚧 **Advanced ML Algorithms**: Random Forest, Gradient Boosting, SVM, Naive Bayes
-- 🚧 **Clustering Methods**: K-Means, DBSCAN, Hierarchical Clustering, Gaussian Mixture
-- 🚧 **Ensemble Methods**: Voting, Bagging, AdaBoost, Stacking
-- 🚧 **Deep Learning**: LSTM, GRU, Transformer, Attention mechanisms
-- 🚧 **Advanced Math**: SVD, PCA, Eigenvalue decomposition, Fourier transforms
-- 🚧 **Model Serialization**: Save/load trained models (JSON/Protobuf)
-- 🚧 **Python Bindings**: Full Python integration for easy experimentation
-- 🚧 **GPU Acceleration**: CUDA integration for GPU computing
-- 🚧 **Distributed Training**: Multi-GPU and multi-node support
+### Working Reference Core
+
+- Core tensor creation, storage, indexing, reshape, 2D transpose, scalar operations, and same-shape element-wise arithmetic
+- Basic reductions without axes: `sum`, `mean`, `min`, `max`, `norm`
+- Basic matrix operations: 2D `matmul`, 1D `dot`, and simple matrix inversion
+- Common element-wise math functions, activation functions, and loss functions
+- Early SIMD helpers for selected operations
+- Standalone C++ assert-based tests for the current core
+
+### Experimental Or Incomplete
+
+- Axis reductions, arbitrary-axis transpose, broadcasting, and slicing
+- Autograd integration with normal tensor operations
+- Optimizers that update real parameter gradients
+- Full neural-network training loops
+- Pooling backward passes, LSTM, embeddings, BatchNorm/LayerNorm backward passes
+- Scikit-learn style algorithms that depend on incomplete slicing/reduction behavior
+- Python bindings for the full declared API
+- BLAS, CUDA, distributed training, serialization, SVD/eigendecomposition, and advanced ML algorithms
+
+Incomplete operations should throw clear `not implemented` errors instead of
+returning placeholder values. See [TODO.md](TODO.md) for the active consolidation
+plan.
 
 *See [Development Roadmap](README_ROADMAP.md) for complete feature list and timeline.*
 
@@ -54,14 +55,11 @@ A C++ machine learning library designed for educational purposes to understand t
 
 ### Key Features
 
-- **SIMD Optimizations**: AVX2/AVX/SSE vectorized operations for 4x-8x performance boost
-- **Memory Pool**: Efficient allocation/deallocation system for large tensors
-- **Automatic Differentiation**: Complete computational graph with forward/backward passes
-- **Neural Network Layers**: Dense, Conv2D, MaxPool2D, AvgPool2D with proper gradients
-- **Optimization Algorithms**: 8 different optimizers (SGD, Adam, RMSprop, etc.)
-- **CPU Feature Detection**: Automatic detection of available SIMD instructions
-- **Performance Benchmarking**: Comprehensive testing framework
-- **GPU Support**: CUDA integration for GPU acceleration (future)
+- **Readable Tensor Core**: Small tensor type with explicit shape and storage behavior
+- **Reference Math Implementations**: Straightforward loops for core math before advanced optimization
+- **Selected SIMD Helpers**: Early vectorized paths for a few operations
+- **Educational API Surface**: Work in progress toward a compact, teachable ML library
+- **Performance Benchmarking**: Basic standalone benchmark executable
 
 ## 📁 Project Structure
 
@@ -128,7 +126,6 @@ tensorcore/
 - C++17 or later
 - CMake 3.15+
 - Python 3.8+
-- BLAS library (OpenBLAS, Intel MKL, or ATLAS)
 - pybind11 (for Python bindings)
 
 ### Building from Source
@@ -155,60 +152,41 @@ cd ../python
 pip install -e .
 ```
 
+The default CMake build targets the stable reference core. Broader modules such
+as autograd, neural-network layers, optimizers, sklearn-style APIs, memory-pool
+experiments, and Python bindings are currently experimental:
+
+```bash
+cmake .. -DTENSORCORE_BUILD_EXPERIMENTAL=ON
+```
+
 ### Quick Start Example
 
-#### Neural Network Example
+#### Core Tensor Example
 ```cpp
 #include "tensorcore/tensor.hpp"
-#include "tensorcore/layers.hpp"
-#include "tensorcore/optimizers.hpp"
-#include "tensorcore/autograd.hpp"
-#include "tensorcore/simd_utils.hpp"
 
 using namespace tensorcore;
 
 int main() {
-    // Create tensors with automatic differentiation
-    auto x = variable(Tensor({1, 2}, {1.0, 2.0}), true);
-    auto y = variable(Tensor({1, 2}, {3.0, 4.0}), true);
-    
-    // Perform operations with gradient tracking (SIMD-optimized)
-    auto z = global_graph.add(x, y);
-    auto result = global_graph.multiply(z, z);
-    
-    // Compute gradients
-    global_graph.backward(result);
-    
-    // Create a neural network with Conv2D
-    auto conv1 = std::make_shared<Conv2D>(1, 32, 3, 1, 1, true, "relu");
-    auto pool1 = std::make_shared<MaxPool2D>(2, 2, 0);
-    auto dense1 = std::make_shared<Dense>(32 * 13 * 13, 128, true, "relu");
-    auto dense2 = std::make_shared<Dense>(128, 10, true, "softmax");
-    
-    Sequential network({conv1, pool1, dense1, dense2});
-    
-    // Forward pass with SIMD optimizations
-    Tensor input({1, 1, 28, 28}); // MNIST-like image
-    Tensor output = network.forward(input);
-    
-    // Training with optimizer
-    Adam optimizer(0.001);
-    optimizer.add_parameters(network.get_parameters());
-    
-    // Training loop
-    for (int epoch = 0; epoch < 100; ++epoch) {
-        Tensor pred = network.forward(input);
-        // Compute loss and gradients...
-        network.backward(grad_output);
-        optimizer.step();
-        network.zero_grad();
-    }
-    
+    Tensor a = {{1.0, 2.0}, {3.0, 4.0}};
+    Tensor b = {{5.0, 6.0}, {7.0, 8.0}};
+
+    Tensor c = a.matmul(b);
+    Tensor total = c.sum();
+
+    c.print();
+    total.print();
+
     return 0;
 }
 ```
 
 #### Scikit-learn Style Machine Learning
+
+This API is experimental while slicing, broadcasting, and axis reductions are
+being completed. Treat the example below as a design sketch, not a stable path.
+
 ```cpp
 #include "tensorcore/sklearn.hpp"
 
@@ -251,53 +229,22 @@ int main() {
 }
 ```
 
-## 🚀 Core Features Implemented
+## Core Features
 
-### **Automatic Differentiation System**
-- Complete computational graph with forward/backward passes
-- Support for complex mathematical expressions
-- Efficient gradient computation using chain rule
-- Memory-efficient graph construction and cleanup
+### Stable Enough To Study
 
-### **Neural Network Components**
-- **Dense Layer**: Fully connected layer with Xavier initialization
-- **Conv2D Layer**: 2D convolution with forward/backward passes
-- **MaxPool2D Layer**: Maximum pooling for downsampling
-- **AvgPool2D Layer**: Average pooling for downsampling
-- **Activation Functions**: ReLU, Sigmoid, Tanh with proper gradients
-- **Sequential Container**: Easy multi-layer network construction
-- **Gradient Flow**: End-to-end gradient computation through layers
+- Tensor creation, shape metadata, indexing, reshape, 2D transpose, and copy/move behavior
+- Same-shape arithmetic and scalar arithmetic
+- Basic element-wise math, activations, losses, and simple linear algebra
+- Standalone tests and benchmarks for the current reference core
 
-### **Performance Optimizations**
-- **SIMD Vectorization**: AVX2/AVX/SSE instructions for 4x-8x speedup
-- **Memory Pool**: Efficient allocation/deallocation for large tensors
-- **CPU Feature Detection**: Automatic detection of available SIMD instructions
-- **Optimized Operations**: All tensor operations use vectorized instructions
+### Under Construction
 
-### **Optimization Algorithms**
-- **SGD**: Stochastic Gradient Descent with momentum
-- **Adam**: Adaptive learning rate optimization
-- **AdamW**: Adam with decoupled weight decay
-- **RMSprop**: Root Mean Square propagation
-- **Adagrad**: Adaptive gradient algorithm
-- **Adadelta**: Adagrad with moving average
-- **Adamax**: Adam with infinity norm
-- **Nadam**: Nesterov-accelerated Adam
-
-### **Scikit-learn Style Machine Learning**
-- **Linear Models**: LinearRegression, Ridge, Lasso, ElasticNet, LogisticRegression
-- **Tree-based Models**: DecisionTreeClassifier, DecisionTreeRegressor
-- **Preprocessing**: StandardScaler, MinMaxScaler, LabelEncoder, OneHotEncoder
-- **Evaluation Metrics**: Accuracy, Precision, Recall, F1-Score, MSE, MAE, R²
-- **Model Selection**: train_test_split, cross_val_score, GridSearchCV
-- **Unified API**: Consistent fit/predict/transform interface across all models
-
-### **Testing & Validation**
-- Comprehensive test suite with 100% core functionality coverage
-- End-to-end neural network training verification
-- Gradient computation accuracy validation
-- Performance benchmarking framework
-- SIMD optimization testing
+- Autograd and optimizer design
+- Neural-network layers beyond simple forward-pass experiments
+- Scikit-learn style algorithms
+- Python bindings for the complete C++ surface
+- Advanced decomposition, GPU, and distributed features
 
 ## 🧮 Mathematical Foundations
 
@@ -449,7 +396,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Inspired by NumPy, PyTorch, and TensorFlow
 - Built with pybind11 for Python integration
-- Uses OpenBLAS for linear algebra operations
+- Inspired by BLAS-style linear algebra interfaces; external BLAS integration is still experimental
 - Educational resources from various ML courses and textbooks
 
 ## 🎓 Educational Value

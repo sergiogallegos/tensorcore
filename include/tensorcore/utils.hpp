@@ -1,12 +1,20 @@
 #pragma once
 
 #include "tensor.hpp"
+#include <functional>
+#include <iosfwd>
+#include <tuple>
+#include <utility>
 #include <vector>
 #include <string>
-#include <random>
+
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
 #include <chrono>
-#include <memory>
 #include <fstream>
+#include <memory>
+#include <random>
+#include <unordered_map>
+#endif
 
 namespace tensorcore {
 
@@ -17,6 +25,8 @@ namespace tensorcore {
  * for machine learning operations, including random number generation,
  * data loading, preprocessing, and other helper functions.
  */
+
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
 
 // Random number generation
 class RandomGenerator {
@@ -267,28 +277,46 @@ public:
     static std::string format(const std::string& format, ...);
 };
 
-// Global utility functions
-void set_random_seed(unsigned int seed);
-Tensor create_identity_matrix(int size);
-Tensor create_zeros(const Tensor::shape_type& shape);
-Tensor create_ones(const Tensor::shape_type& shape);
-Tensor create_range(double start, double stop, double step = 1.0);
+#endif
 
-// Additional utility functions for sklearn compatibility
+// Tensor creation and random utilities
+void set_seed(unsigned int seed);
 Tensor zeros(const Tensor::shape_type& shape);
 Tensor ones(const Tensor::shape_type& shape);
 Tensor eye(size_t n);
-Tensor concatenate(const std::vector<Tensor>& tensors, int axis);
-Tensor where(const Tensor& condition, const Tensor& x, const Tensor& y);
-Tensor solve(const Tensor& A, const Tensor& b);
+Tensor eye(size_t rows, size_t cols);
 Tensor arange(double start, double stop, double step = 1.0);
 Tensor linspace(double start, double stop, size_t num);
 Tensor random_normal(const Tensor::shape_type& shape, double mean = 0.0, double std = 1.0);
 Tensor random_uniform(const Tensor::shape_type& shape, double min = 0.0, double max = 1.0);
+Tensor create_zeros(const Tensor::shape_type& shape);
+Tensor create_ones(const Tensor::shape_type& shape);
+Tensor create_tensor(const std::vector<double>& data, const std::vector<size_t>& shape = {}, bool requires_grad = false);
+
+// Mathematical and shape utilities
+double log_sum_exp(const Tensor& x);
+bool is_broadcastable(const Tensor::shape_type& shape1, const Tensor::shape_type& shape2);
+Tensor::shape_type broadcast_shape(const Tensor::shape_type& shape1, const Tensor::shape_type& shape2);
+
+// Memory and validation utilities
+size_t get_memory_usage(const Tensor& tensor);
+size_t get_total_memory_usage(const std::vector<Tensor>& tensors);
+bool validate_tensor(const Tensor& tensor);
+bool validate_tensors(const std::vector<Tensor>& tensors);
 
 // Debugging utilities
 void print_tensor_info(const Tensor& tensor, const std::string& name = "");
-void print_memory_usage();
-void print_configuration();
+void benchmark_operation(const std::function<void()>& operation, const std::string& name, int iterations);
+
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
+// Additional utility functions for sklearn compatibility
+Tensor concatenate(const std::vector<Tensor>& tensors, int axis);
+Tensor where(const Tensor& condition, const Tensor& x, const Tensor& y);
+Tensor solve(const Tensor& A, const Tensor& b);
+
+// Gradient utilities
+void zero_gradients(std::vector<Tensor>& tensors);
+void clip_gradients(std::vector<Tensor>& tensors, double max_norm);
+#endif
 
 } // namespace tensorcore

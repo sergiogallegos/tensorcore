@@ -397,14 +397,7 @@ Tensor Tensor::transpose(const std::vector<int>& axes) const {
         used[axis] = true;
     }
     
-    shape_type new_shape(shape_.size());
-    for (size_type i = 0; i < axes.size(); ++i) {
-        new_shape[i] = shape_[axes[i]];
-    }
-    
-    Tensor result(new_shape);
-    // TODO: Implement actual transposition logic
-    return result;
+    throw std::runtime_error("transpose(axes) is not implemented yet");
 }
 
 Tensor Tensor::squeeze() const {
@@ -466,13 +459,7 @@ Tensor Tensor::sum(int axis) const {
         throw std::invalid_argument("Invalid axis");
     }
     
-    shape_type new_shape = shape_;
-    new_shape.erase(new_shape.begin() + axis);
-    
-    Tensor result(new_shape);
-    
-    // TODO: Implement axis-wise summation
-    return result;
+    throw std::runtime_error("sum(axis) is not implemented yet");
 }
 
 Tensor Tensor::mean() const {
@@ -488,13 +475,7 @@ Tensor Tensor::mean(int axis) const {
         throw std::invalid_argument("Invalid axis");
     }
     
-    shape_type new_shape = shape_;
-    new_shape.erase(new_shape.begin() + axis);
-    
-    Tensor result(new_shape);
-    
-    // TODO: Implement axis-wise mean
-    return result;
+    throw std::runtime_error("mean(axis) is not implemented yet");
 }
 
 Tensor Tensor::max() const {
@@ -516,13 +497,7 @@ Tensor Tensor::max(int axis) const {
         throw std::invalid_argument("Invalid axis");
     }
     
-    shape_type new_shape = shape_;
-    new_shape.erase(new_shape.begin() + axis);
-    
-    Tensor result(new_shape);
-    
-    // TODO: Implement axis-wise max
-    return result;
+    throw std::runtime_error("max(axis) is not implemented yet");
 }
 
 Tensor Tensor::min() const {
@@ -544,13 +519,7 @@ Tensor Tensor::min(int axis) const {
         throw std::invalid_argument("Invalid axis");
     }
     
-    shape_type new_shape = shape_;
-    new_shape.erase(new_shape.begin() + axis);
-    
-    Tensor result(new_shape);
-    
-    // TODO: Implement axis-wise min
-    return result;
+    throw std::runtime_error("min(axis) is not implemented yet");
 }
 
 Tensor Tensor::abs() const {
@@ -655,13 +624,7 @@ Tensor Tensor::norm(int axis) const {
         throw std::invalid_argument("Invalid axis");
     }
     
-    shape_type new_shape = shape_;
-    new_shape.erase(new_shape.begin() + axis);
-    
-    Tensor result(new_shape);
-    
-    // TODO: Implement axis-wise norm
-    return result;
+    throw std::runtime_error("norm(axis) is not implemented yet");
 }
 
 Tensor Tensor::var() const {
@@ -676,13 +639,7 @@ Tensor Tensor::var(int axis) const {
         throw std::invalid_argument("Invalid axis");
     }
     
-    shape_type new_shape = shape_;
-    new_shape.erase(new_shape.begin() + axis);
-    
-    Tensor result(new_shape);
-    
-    // TODO: Implement axis-wise variance
-    return result;
+    throw std::runtime_error("var(axis) is not implemented yet");
 }
 
 Tensor Tensor::std() const {
@@ -697,13 +654,7 @@ Tensor Tensor::std(int axis) const {
         throw std::invalid_argument("Invalid axis");
     }
     
-    shape_type new_shape = shape_;
-    new_shape.erase(new_shape.begin() + axis);
-    
-    Tensor result(new_shape);
-    
-    // TODO: Implement axis-wise standard deviation
-    return result;
+    throw std::runtime_error("std(axis) is not implemented yet");
 }
 
 // Utility functions
@@ -860,15 +811,11 @@ bool Tensor::is_broadcastable(const Tensor& other) const {
 }
 
 Tensor Tensor::broadcast_to([[maybe_unused]] const shape_type& target_shape) const {
-    // Simple implementation - just return a copy for now
-    // TODO: Implement actual broadcasting
-    return *this;
+    throw std::runtime_error("broadcast_to is not implemented yet");
 }
 
 Tensor Tensor::slice([[maybe_unused]] const std::vector<std::pair<size_type, size_type>>& ranges) const {
-    // Simple implementation - return a copy for now
-    // TODO: Implement actual slicing
-    return *this;
+    throw std::runtime_error("slice is not implemented yet");
 }
 
 Tensor Tensor::index(const std::vector<size_type>& indices) const {

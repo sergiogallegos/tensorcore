@@ -55,12 +55,6 @@ Tensor Dense::forward(const Tensor& input) {
     // Store input for backward pass
     last_input_ = input;
     
-    // Debug output
-    std::cout << "Input shape: " << input.shape()[0] << "x" << input.shape()[1] << std::endl;
-    std::cout << "Weights shape: " << weights_.shape()[0] << "x" << weights_.shape()[1] << std::endl;
-    std::cout << "Input dimensions: " << input.shape().size() << std::endl;
-    std::cout << "Weights dimensions: " << weights_.shape().size() << std::endl;
-    
     // Linear transformation: output = input * weights + bias
     Tensor linear_output = input.matmul(weights_);
     

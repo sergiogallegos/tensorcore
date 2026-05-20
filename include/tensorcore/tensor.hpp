@@ -4,7 +4,6 @@
 #include <memory>
 #include <string>
 #include <initializer_list>
-#include <functional>
 #include <cstdint>
 
 namespace tensorcore {
@@ -84,28 +83,40 @@ public:
     size_type size() const { return size_; }
     const data_type& data() const { return data_; }
     data_type& data() { return data_; }
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
     bool requires_grad() const { return requires_grad_; }
     
     // Setters
     void set_requires_grad(bool requires_grad) { requires_grad_ = requires_grad; }
+#endif
     
     // Shape operations
     Tensor reshape(const shape_type& new_shape) const;
     Tensor transpose() const;
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
     Tensor transpose(const std::vector<int>& axes) const;
+#endif
     Tensor squeeze() const;
     Tensor squeeze(int axis) const;
     Tensor unsqueeze(int axis) const;
     
     // Mathematical operations
     Tensor sum() const;
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
     Tensor sum(int axis) const;
+#endif
     Tensor mean() const;
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
     Tensor mean(int axis) const;
+#endif
     Tensor max() const;
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
     Tensor max(int axis) const;
+#endif
     Tensor min() const;
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
     Tensor min(int axis) const;
+#endif
     Tensor abs() const;
     Tensor sqrt() const;
     Tensor exp() const;
@@ -116,11 +127,17 @@ public:
     Tensor matmul(const Tensor& other) const;
     Tensor dot(const Tensor& other) const;
     Tensor norm() const;
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
     Tensor norm(int axis) const;
+#endif
     Tensor var() const;
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
     Tensor var(int axis) const;
+#endif
     Tensor std() const;
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
     Tensor std(int axis) const;
+#endif
     
     // Utility functions
     Tensor copy() const;
@@ -139,12 +156,14 @@ public:
     void* data_ptr() { return data_.data(); }
     const void* data_ptr() const { return data_.data(); }
     
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
     // Broadcasting
     bool is_broadcastable(const Tensor& other) const;
     Tensor broadcast_to(const shape_type& target_shape) const;
     
     // Indexing
     Tensor slice(const std::vector<std::pair<size_type, size_type>>& ranges) const;
+#endif
     Tensor index(const std::vector<size_type>& indices) const;
     
 private:

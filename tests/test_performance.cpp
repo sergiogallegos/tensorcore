@@ -34,7 +34,7 @@ void benchmark_tensor_creation() {
     
     {
         PerformanceTimer timer("Create tensor with shape constructor");
-        Tensor t({size});
+        Tensor t(Tensor::shape_type{size});
     }
     
     {
@@ -155,8 +155,8 @@ void benchmark_loss_functions() {
     std::cout << "Benchmarking loss functions..." << std::endl;
     
     const size_t size = 1000000;
-    Tensor predictions({size}, 1.0);
-    Tensor targets({size}, 2.0);
+    Tensor predictions({size}, 0.5);
+    Tensor targets({size}, 1.0);
     
     {
         PerformanceTimer timer("MSE loss");

@@ -1,7 +1,12 @@
 #pragma once
 
 #include "tensor.hpp"
-#include <functional>
+
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
+#include <tuple>
+#include <utility>
+#include <vector>
+#endif
 
 namespace tensorcore {
 
@@ -80,6 +85,15 @@ Tensor less(const Tensor& a, const Tensor& b);
 Tensor less_equal(const Tensor& a, const Tensor& b);
 Tensor greater(const Tensor& a, const Tensor& b);
 Tensor greater_equal(const Tensor& a, const Tensor& b);
+Tensor maximum(const Tensor& a, const Tensor& b);
+Tensor minimum(const Tensor& a, const Tensor& b);
+Tensor maximum_scalar(const Tensor& tensor, double scalar);
+Tensor minimum_scalar(const Tensor& tensor, double scalar);
+Tensor clip(const Tensor& tensor, double min_val, double max_val);
+Tensor clip_min(const Tensor& tensor, double min_val);
+Tensor clip_max(const Tensor& tensor, double max_val);
+
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
 
 // Logical operations
 Tensor logical_and(const Tensor& a, const Tensor& b);
@@ -180,6 +194,7 @@ Tensor hessian(const Tensor& tensor, const Tensor& x);
 // Missing functions needed for autograd
 Tensor sigmoid(const Tensor& tensor);
 Tensor relu(const Tensor& tensor);
-Tensor maximum(const Tensor& a, const Tensor& b);
+
+#endif
 
 } // namespace tensorcore

@@ -2,13 +2,18 @@
 
 #include "tensor.hpp"
 
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
+#include <functional>
+#include <string>
+#include <vector>
+#endif
+
 namespace tensorcore {
 
 /**
  * @brief Activation functions for neural networks
  * 
- * This module provides various activation functions commonly used in neural networks,
- * including their forward and backward (gradient) implementations.
+ * This module provides activation functions commonly used in neural networks.
  */
 
 // Basic activation functions
@@ -27,12 +32,17 @@ Tensor hard_tanh(const Tensor& x, double min_val = -1.0, double max_val = 1.0);
 
 // Softmax family
 Tensor softmax(const Tensor& x);
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
 Tensor softmax(const Tensor& x, int axis);
+#endif
 Tensor log_softmax(const Tensor& x);
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
 Tensor log_softmax(const Tensor& x, int axis);
+#endif
 Tensor softplus(const Tensor& x, double beta = 1.0);
 Tensor softsign(const Tensor& x);
 
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
 // Gaussian family
 Tensor gaussian(const Tensor& x, double mean = 0.0, double std = 1.0);
 Tensor gaussian_noise(const Tensor& x, double std = 1.0);
@@ -42,41 +52,44 @@ Tensor identity(const Tensor& x);
 Tensor step(const Tensor& x);
 Tensor ramp(const Tensor& x);
 Tensor bent_identity(const Tensor& x);
+#endif
 Tensor silu(const Tensor& x);
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
 Tensor celu(const Tensor& x, double alpha = 1.0);
+#endif
 
-// Gradient functions (for backpropagation)
-Tensor relu_grad(const Tensor& x, const Tensor& grad_output);
-Tensor leaky_relu_grad(const Tensor& x, const Tensor& grad_output, double alpha = 0.01);
-Tensor elu_grad(const Tensor& x, const Tensor& grad_output, double alpha = 1.0);
-Tensor gelu_grad(const Tensor& x, const Tensor& grad_output);
-Tensor swish_grad(const Tensor& x, const Tensor& grad_output, double beta = 1.0);
-Tensor mish_grad(const Tensor& x, const Tensor& grad_output);
+// Derivatives for backpropagation experiments
+Tensor relu_grad(const Tensor& x);
+Tensor leaky_relu_grad(const Tensor& x, double alpha = 0.01);
+Tensor elu_grad(const Tensor& x, double alpha = 1.0);
+Tensor sigmoid_grad(const Tensor& x);
+Tensor tanh_grad(const Tensor& x);
+Tensor swish_grad(const Tensor& x);
 
-Tensor sigmoid_grad(const Tensor& x, const Tensor& grad_output);
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
+Tensor gelu_grad(const Tensor& x);
+Tensor mish_grad(const Tensor& x);
 Tensor hard_sigmoid_grad(const Tensor& x, const Tensor& grad_output);
-Tensor tanh_grad(const Tensor& x, const Tensor& grad_output);
-Tensor hard_tanh_grad(const Tensor& x, const Tensor& grad_output, 
+Tensor hard_tanh_grad(const Tensor& x, const Tensor& grad_output,
                       double min_val = -1.0, double max_val = 1.0);
-
 Tensor softmax_grad(const Tensor& x, const Tensor& grad_output);
 Tensor softmax_grad(const Tensor& x, const Tensor& grad_output, int axis);
 Tensor log_softmax_grad(const Tensor& x, const Tensor& grad_output);
 Tensor log_softmax_grad(const Tensor& x, const Tensor& grad_output, int axis);
 Tensor softplus_grad(const Tensor& x, const Tensor& grad_output, double beta = 1.0);
 Tensor softsign_grad(const Tensor& x, const Tensor& grad_output);
-
-Tensor gaussian_grad(const Tensor& x, const Tensor& grad_output, 
+Tensor gaussian_grad(const Tensor& x, const Tensor& grad_output,
                      double mean = 0.0, double std = 1.0);
 Tensor gaussian_noise_grad(const Tensor& x, const Tensor& grad_output, double std = 1.0);
-
 Tensor identity_grad(const Tensor& x, const Tensor& grad_output);
 Tensor step_grad(const Tensor& x, const Tensor& grad_output);
 Tensor ramp_grad(const Tensor& x, const Tensor& grad_output);
 Tensor bent_identity_grad(const Tensor& x, const Tensor& grad_output);
 Tensor silu_grad(const Tensor& x, const Tensor& grad_output);
 Tensor celu_grad(const Tensor& x, const Tensor& grad_output, double alpha = 1.0);
+#endif
 
+#if TENSORCORE_EXPERIMENTAL_API || TENSORCORE_BUILDING_LIBRARY
 // Activation function class for easy switching
 class ActivationFunction {
 public:
@@ -123,5 +136,6 @@ extern const ActivationFunction CELU;
 std::string get_activation_name(const ActivationFunction& activation);
 ActivationFunction get_activation_by_name(const std::string& name);
 std::vector<std::string> get_available_activations();
+#endif
 
 } // namespace tensorcore

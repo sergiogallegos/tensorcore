@@ -113,11 +113,13 @@ void test_division_by_zero() {
     Tensor a({3}, 1.0);
     Tensor b({3}, 0.0);
     
-    // Test that division by zero produces infinity or NaN
-    Tensor result = a / b;
-    for (size_t i = 0; i < result.size(); ++i) {
-        assert(std::isinf(result[i]) || std::isnan(result[i]));
+    bool exception_thrown = false;
+    try {
+        [[maybe_unused]] Tensor result = a / b;
+    } catch (const std::runtime_error&) {
+        exception_thrown = true;
     }
+    assert(exception_thrown);
     
     std::cout << "  ✓ Division by zero handling tests passed" << std::endl;
 }
@@ -127,11 +129,13 @@ void test_sqrt_negative() {
     
     Tensor a({3}, -1.0);
     
-    // Test that sqrt of negative numbers produces NaN
-    Tensor result = a.sqrt();
-    for (size_t i = 0; i < result.size(); ++i) {
-        assert(std::isnan(result[i]));
+    bool exception_thrown = false;
+    try {
+        [[maybe_unused]] Tensor result = a.sqrt();
+    } catch (const std::domain_error&) {
+        exception_thrown = true;
     }
+    assert(exception_thrown);
     
     std::cout << "  ✓ Sqrt of negative numbers tests passed" << std::endl;
 }
@@ -141,11 +145,13 @@ void test_log_zero() {
     
     Tensor a({3}, 0.0);
     
-    // Test that log of zero produces negative infinity
-    Tensor result = a.log();
-    for (size_t i = 0; i < result.size(); ++i) {
-        assert(std::isinf(result[i]) && result[i] < 0);
+    bool exception_thrown = false;
+    try {
+        [[maybe_unused]] Tensor result = a.log();
+    } catch (const std::domain_error&) {
+        exception_thrown = true;
     }
+    assert(exception_thrown);
     
     std::cout << "  ✓ Log of zero tests passed" << std::endl;
 }
@@ -155,11 +161,13 @@ void test_log_negative() {
     
     Tensor a({3}, -1.0);
     
-    // Test that log of negative numbers produces NaN
-    Tensor result = a.log();
-    for (size_t i = 0; i < result.size(); ++i) {
-        assert(std::isnan(result[i]));
+    bool exception_thrown = false;
+    try {
+        [[maybe_unused]] Tensor result = a.log();
+    } catch (const std::domain_error&) {
+        exception_thrown = true;
     }
+    assert(exception_thrown);
     
     std::cout << "  ✓ Log of negative numbers tests passed" << std::endl;
 }

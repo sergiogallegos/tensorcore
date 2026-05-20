@@ -96,10 +96,10 @@ void SIMDUtils::avx2_add(const double* a, const double* b, double* result, size_
     
     // Process 4 doubles at a time with AVX2
     for (; i + 3 < size; i += 4) {
-        __m256d va = _mm256_load_pd(&a[i]);
-        __m256d vb = _mm256_load_pd(&b[i]);
+        __m256d va = _mm256_loadu_pd(&a[i]);
+        __m256d vb = _mm256_loadu_pd(&b[i]);
         __m256d vresult = _mm256_add_pd(va, vb);
-        _mm256_store_pd(&result[i], vresult);
+        _mm256_storeu_pd(&result[i], vresult);
     }
     
     // Handle remaining elements
@@ -113,10 +113,10 @@ void SIMDUtils::avx2_multiply(const double* a, const double* b, double* result, 
     
     // Process 4 doubles at a time with AVX2
     for (; i + 3 < size; i += 4) {
-        __m256d va = _mm256_load_pd(&a[i]);
-        __m256d vb = _mm256_load_pd(&b[i]);
+        __m256d va = _mm256_loadu_pd(&a[i]);
+        __m256d vb = _mm256_loadu_pd(&b[i]);
         __m256d vresult = _mm256_mul_pd(va, vb);
-        _mm256_store_pd(&result[i], vresult);
+        _mm256_storeu_pd(&result[i], vresult);
     }
     
     // Handle remaining elements
@@ -130,9 +130,9 @@ void SIMDUtils::avx2_sqrt(const double* a, double* result, size_t size) {
     
     // Process 4 doubles at a time with AVX2
     for (; i + 3 < size; i += 4) {
-        __m256d va = _mm256_load_pd(&a[i]);
+        __m256d va = _mm256_loadu_pd(&a[i]);
         __m256d vresult = _mm256_sqrt_pd(va);
-        _mm256_store_pd(&result[i], vresult);
+        _mm256_storeu_pd(&result[i], vresult);
     }
     
     // Handle remaining elements
@@ -149,10 +149,10 @@ void SIMDUtils::sse_add(const double* a, const double* b, double* result, size_t
     
     // Process 2 doubles at a time with SSE
     for (; i + 1 < size; i += 2) {
-        __m128d va = _mm_load_pd(&a[i]);
-        __m128d vb = _mm_load_pd(&b[i]);
+        __m128d va = _mm_loadu_pd(&a[i]);
+        __m128d vb = _mm_loadu_pd(&b[i]);
         __m128d vresult = _mm_add_pd(va, vb);
-        _mm_store_pd(&result[i], vresult);
+        _mm_storeu_pd(&result[i], vresult);
     }
     
     // Handle remaining elements
@@ -166,10 +166,10 @@ void SIMDUtils::sse_multiply(const double* a, const double* b, double* result, s
     
     // Process 2 doubles at a time with SSE
     for (; i + 1 < size; i += 2) {
-        __m128d va = _mm_load_pd(&a[i]);
-        __m128d vb = _mm_load_pd(&b[i]);
+        __m128d va = _mm_loadu_pd(&a[i]);
+        __m128d vb = _mm_loadu_pd(&b[i]);
         __m128d vresult = _mm_mul_pd(va, vb);
-        _mm_store_pd(&result[i], vresult);
+        _mm_storeu_pd(&result[i], vresult);
     }
     
     // Handle remaining elements
@@ -183,9 +183,9 @@ void SIMDUtils::sse_sqrt(const double* a, double* result, size_t size) {
     
     // Process 2 doubles at a time with SSE
     for (; i + 1 < size; i += 2) {
-        __m128d va = _mm_load_pd(&a[i]);
+        __m128d va = _mm_loadu_pd(&a[i]);
         __m128d vresult = _mm_sqrt_pd(va);
-        _mm_store_pd(&result[i], vresult);
+        _mm_storeu_pd(&result[i], vresult);
     }
     
     // Handle remaining elements
@@ -222,16 +222,16 @@ void SIMDUtils::vectorized_add_scalar(const double* a, double scalar, double* re
     if (has_avx2()) {
         __m256d vscalar = _mm256_set1_pd(scalar);
         for (; i + 3 < size; i += 4) {
-            __m256d va = _mm256_load_pd(&a[i]);
+            __m256d va = _mm256_loadu_pd(&a[i]);
             __m256d vresult = _mm256_add_pd(va, vscalar);
-            _mm256_store_pd(&result[i], vresult);
+            _mm256_storeu_pd(&result[i], vresult);
         }
     } else if (has_sse4_1()) {
         __m128d vscalar = _mm_set1_pd(scalar);
         for (; i + 1 < size; i += 2) {
-            __m128d va = _mm_load_pd(&a[i]);
+            __m128d va = _mm_loadu_pd(&a[i]);
             __m128d vresult = _mm_add_pd(va, vscalar);
-            _mm_store_pd(&result[i], vresult);
+            _mm_storeu_pd(&result[i], vresult);
         }
     }
     
@@ -247,16 +247,16 @@ void SIMDUtils::vectorized_multiply_scalar(const double* a, double scalar, doubl
     if (has_avx2()) {
         __m256d vscalar = _mm256_set1_pd(scalar);
         for (; i + 3 < size; i += 4) {
-            __m256d va = _mm256_load_pd(&a[i]);
+            __m256d va = _mm256_loadu_pd(&a[i]);
             __m256d vresult = _mm256_mul_pd(va, vscalar);
-            _mm256_store_pd(&result[i], vresult);
+            _mm256_storeu_pd(&result[i], vresult);
         }
     } else if (has_sse4_1()) {
         __m128d vscalar = _mm_set1_pd(scalar);
         for (; i + 1 < size; i += 2) {
-            __m128d va = _mm_load_pd(&a[i]);
+            __m128d va = _mm_loadu_pd(&a[i]);
             __m128d vresult = _mm_mul_pd(va, vscalar);
-            _mm_store_pd(&result[i], vresult);
+            _mm_storeu_pd(&result[i], vresult);
         }
     }
     
@@ -276,24 +276,24 @@ double SIMDUtils::vectorized_sum(const double* a, size_t size) {
     if (has_avx2()) {
         __m256d vsum = _mm256_setzero_pd();
         for (; i + 3 < size; i += 4) {
-            __m256d va = _mm256_load_pd(&a[i]);
+            __m256d va = _mm256_loadu_pd(&a[i]);
             vsum = _mm256_add_pd(vsum, va);
         }
         
         // Extract sum from vector
         double temp[4];
-        _mm256_store_pd(temp, vsum);
+        _mm256_storeu_pd(temp, vsum);
         sum = temp[0] + temp[1] + temp[2] + temp[3];
     } else if (has_sse4_1()) {
         __m128d vsum = _mm_setzero_pd();
         for (; i + 1 < size; i += 2) {
-            __m128d va = _mm_load_pd(&a[i]);
+            __m128d va = _mm_loadu_pd(&a[i]);
             vsum = _mm_add_pd(vsum, va);
         }
         
         // Extract sum from vector
         double temp[2];
-        _mm_store_pd(temp, vsum);
+        _mm_storeu_pd(temp, vsum);
         sum = temp[0] + temp[1];
     }
     
@@ -324,24 +324,24 @@ double SIMDUtils::vectorized_max(const double* a, size_t size) {
     if (has_avx2()) {
         __m256d vmax = _mm256_set1_pd(max_val);
         for (; i + 3 < size; i += 4) {
-            __m256d va = _mm256_load_pd(&a[i]);
+            __m256d va = _mm256_loadu_pd(&a[i]);
             vmax = _mm256_max_pd(vmax, va);
         }
         
         // Extract max from vector
         double temp[4];
-        _mm256_store_pd(temp, vmax);
+        _mm256_storeu_pd(temp, vmax);
         max_val = std::max({temp[0], temp[1], temp[2], temp[3]});
     } else if (has_sse4_1()) {
         __m128d vmax = _mm_set1_pd(max_val);
         for (; i + 1 < size; i += 2) {
-            __m128d va = _mm_load_pd(&a[i]);
+            __m128d va = _mm_loadu_pd(&a[i]);
             vmax = _mm_max_pd(vmax, va);
         }
         
         // Extract max from vector
         double temp[2];
-        _mm_store_pd(temp, vmax);
+        _mm_storeu_pd(temp, vmax);
         max_val = std::max(temp[0], temp[1]);
     }
     
@@ -364,24 +364,24 @@ double SIMDUtils::vectorized_min(const double* a, size_t size) {
     if (has_avx2()) {
         __m256d vmin = _mm256_set1_pd(min_val);
         for (; i + 3 < size; i += 4) {
-            __m256d va = _mm256_load_pd(&a[i]);
+            __m256d va = _mm256_loadu_pd(&a[i]);
             vmin = _mm256_min_pd(vmin, va);
         }
         
         // Extract min from vector
         double temp[4];
-        _mm256_store_pd(temp, vmin);
+        _mm256_storeu_pd(temp, vmin);
         min_val = std::min({temp[0], temp[1], temp[2], temp[3]});
     } else if (has_sse4_1()) {
         __m128d vmin = _mm_set1_pd(min_val);
         for (; i + 1 < size; i += 2) {
-            __m128d va = _mm_load_pd(&a[i]);
+            __m128d va = _mm_loadu_pd(&a[i]);
             vmin = _mm_min_pd(vmin, va);
         }
         
         // Extract min from vector
         double temp[2];
-        _mm_store_pd(temp, vmin);
+        _mm_storeu_pd(temp, vmin);
         min_val = std::min(temp[0], temp[1]);
     }
     
@@ -409,16 +409,16 @@ void SIMDUtils::vectorized_relu(const double* a, double* result, size_t size) {
     if (has_avx2()) {
         __m256d vzero = _mm256_setzero_pd();
         for (; i + 3 < size; i += 4) {
-            __m256d va = _mm256_load_pd(&a[i]);
+            __m256d va = _mm256_loadu_pd(&a[i]);
             __m256d vresult = _mm256_max_pd(va, vzero);
-            _mm256_store_pd(&result[i], vresult);
+            _mm256_storeu_pd(&result[i], vresult);
         }
     } else if (has_sse4_1()) {
         __m128d vzero = _mm_setzero_pd();
         for (; i + 1 < size; i += 2) {
-            __m128d va = _mm_load_pd(&a[i]);
+            __m128d va = _mm_loadu_pd(&a[i]);
             __m128d vresult = _mm_max_pd(va, vzero);
-            _mm_store_pd(&result[i], vresult);
+            _mm_storeu_pd(&result[i], vresult);
         }
     }
     
